@@ -227,6 +227,12 @@ for i in range(desired_games):
         if printing_on == True:
             print("Calculating scores...")
         scoring()
+    if printing_on == False:
+        if i != desired_games - 1:
+            print(f"Simulated {i + 1} of {desired_games} games")
+            print("\033[1A", end = "\x1b[2K")
+        else:
+            print(f"Simulated {i + 1} of {desired_games} games", end = "\n")
 print("-----------------------")
 print("Simulation complete!")
 print(f"Player 1 won {round((p1_wins/desired_games) * 100, 5)}% of the time, while Player 2 won {round((p2_wins/desired_games) * 100, 5)}% of the time")    
