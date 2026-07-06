@@ -25,3 +25,4 @@ Written in Python
 * Tracks results of each turn and scores of each game
 * Tracks percentage of games each player wins and percentage of time ties happen
 * Tracks number of 96 to 0 games
+* Tracks shortest game played
