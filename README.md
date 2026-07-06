@@ -1,7 +1,7 @@
 # ninety-six-simulator
 Simulates multiple iterations of a game of 96 (variation of war that's timed and scored at the end invented by @IsaacLane & @AndrewLane)  
 Based on version by @AndrewLane (https://github.com/AndrewLane/ninety-six-simulator)  
-Written in Python
+Written in Python 3.14
 
 ## Time Parameters
 * Shuffle: 15 sec.  
