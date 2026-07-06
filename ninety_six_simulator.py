@@ -11,6 +11,7 @@ p1_wins = 0
 p2_wins = 0
 ties = 0
 ninety_six = 0
+shortest = 600
 deck = []
 wars = [0, 0, 0, 0, 0, 0, 0, 0]
 hierarchy = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"]
@@ -154,7 +155,7 @@ while True:
             continue
         else:
             break
-desired_time = input("Please enter how many minutes per game you'd like - between 5 and 10 minutes inclusive (enter 'random' to pick randomly each game)")
+desired_time = input("Please enter how many minutes per game you'd like - between 5 and 10 minutes inclusive (enter 'random' to pick randomly each game) ")
 while not (desired_time == "5" or desired_time == "6" or desired_time == "7" or desired_time == "8" or desired_time == "9" or desired_time == "10" or desired_time.lower() == "random"):
     desired_time = input("Please enter a valid input ")
 if desired_time.lower() != "random":
@@ -169,10 +170,9 @@ else:
 start_time = time.time()
 assemble_deck()
 for i in range(desired_games):
-    if desired_time.lower() != "random":
-        timer = desired_time
-    else:
-        timer = random.randrange(5, 10) * 60
+    if str(desired_time).lower() == "random":
+        desired_time = random.randrange(5, 10) * 60
+    timer = desired_time
     p1_collect = []
     p2_collect = []
     p1_draw = []
@@ -217,6 +217,9 @@ for i in range(desired_games):
     if timer <= 0:
        if printing_on == True: 
            print("Time is up!")
+    else:
+       if desired_time - timer < shortest:
+           shortest = desired_time - timer 
     if len(p1_draw) == 0 and len(p1_collect) == 0:
         if printing_on == True:
             print("Player 1 ran out of cards!")
@@ -244,6 +247,7 @@ print(f"Simulation took {time.time() - start_time} seconds")
 print(f"Player 1 won {round((p1_wins/desired_games) * 100, 5)}% of the time ({p1_wins} times), while Player 2 won {round((p2_wins/desired_games) * 100, 5)}% of the time ({p2_wins} time(s))")    
 print(f"Ties happened {round((ties/desired_games) * 100, 5)}% of the time ({ties} time(s))")
 print(f"There were {ninety_six} 96 to 0 game(s) (Happened {round((ninety_six/desired_games) * 100)}% of the time)")
+print(f"The shortest game took {round(shortest / 60)} minute(s) and {shortest % 60} second(s)")
 print(f"Single wars: {wars[0]}")
 print(f"Double wars: {wars[1]}")
 print(f"Triple wars: {wars[2]}")
