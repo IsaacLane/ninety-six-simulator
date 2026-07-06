@@ -154,10 +154,11 @@ while True:
             continue
         else:
             break
-desired_time = input("Please enter how many minutes per game you'd like - between 5 and 10 minutes inclusive ")
-while not (desired_time == "5" or desired_time == "6" or desired_time == "7" or desired_time == "8" or desired_time == "9" or desired_time == "10"):
+desired_time = input("Please enter how many minutes per game you'd like - between 5 and 10 minutes inclusive (enter 'random' to pick randomly each game)")
+while not (desired_time == "5" or desired_time == "6" or desired_time == "7" or desired_time == "8" or desired_time == "9" or desired_time == "10" or desired_time.lower() == "random"):
     desired_time = input("Please enter a valid input ")
-desired_time = int(desired_time) * 60
+if desired_time.lower() != "random":
+    desired_time = int(desired_time) * 60
 printing_on = input("Would you like to turn on print statements? (They will cause significant slowdown with large numbers of games) (Y/N) ")
 while not (printing_on.lower() == "y" or printing_on.lower() == "n"):
     printing_on = input("Please enter a valid input ")
@@ -168,7 +169,10 @@ else:
 start_time = time.time()
 assemble_deck()
 for i in range(desired_games):
-    timer = desired_time
+    if desired_time.lower() != "random":
+        timer = desired_time
+    else:
+        timer = random.randrange(5, 10) * 60
     p1_collect = []
     p2_collect = []
     p1_draw = []
