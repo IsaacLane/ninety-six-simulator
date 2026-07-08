@@ -13,7 +13,8 @@ ties = 0
 ninety_six = 0
 shortest = 600
 deck = []
-wars = [0, 0, 0, 0, 0, 0, 0, 0]
+war_first_occurence = []
+wars = []
 hierarchy = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"]
 war_names = ["Single", "Double", "Triple", "Quadruple", "Quintuple", "Sextuple", "Septuple"]
 def assemble_deck():
@@ -91,7 +92,11 @@ def war():
             war_num = 0
         else:
             war_num += 1
+            if war_num == len(wars):
+                wars.append(0)
             wars[war_num] += 1
+            if war_num - 1 == len(war_first_occurence):
+                war_first_occurence.append(game_number)
             if printing_on == True:
                 print(war_names[war_num] + " War!!")
             war()
@@ -173,6 +178,7 @@ for i in range(desired_games):
     if str(desired_time).lower() == "random":
         desired_time = random.randrange(5, 10) * 60
     timer = desired_time
+    game_number = i + 1
     p1_collect = []
     p2_collect = []
     p1_draw = []
@@ -187,7 +193,7 @@ for i in range(desired_games):
         print("Dealing cards...")
     deal()
     if printing_on == True:
-        print(f"Starting game number {i + 1}")
+        print(f"Starting game number {game_number}")
     while not ((len(p1_draw) == 0 and len(p1_collect) == 0) or (len(p2_draw) == 0 and len(p2_collect) == 0) or
     timer <= 0 or war == "insufficient_cards_for_war"):
         check_reshuffle_draw()
@@ -212,6 +218,8 @@ for i in range(desired_games):
             if printing_on == True:
                 print(f"Player 1 plays {(p1_draw[0]).split("_")[0]} of {(p1_draw[0]).split("_")[1]} and Player 2 plays {(p2_draw[0]).split("_")[0]} of {(p2_draw[0]).split("_")[1]}")
                 print("War!!")
+            if not wars:
+                wars.append(0)
             wars[0] += 1
             war()
     if timer <= 0:
@@ -248,10 +256,8 @@ print(f"Player 1 won {round((p1_wins/desired_games) * 100, 5)}% of the time ({p1
 print(f"Ties happened {round((ties/desired_games) * 100, 5)}% of the time ({ties} time(s))")
 print(f"There were {ninety_six} 96 to 0 game(s) (Happened {round((ninety_six/desired_games) * 100)}% of the time)")
 print(f"The shortest game took {round(shortest / 60)} minute(s) and {shortest % 60} second(s)")
-print(f"Single wars: {wars[0]}")
-print(f"Double wars: {wars[1]}")
-print(f"Triple wars: {wars[2]}")
-print(f"Quadruple wars: {wars[3]}")
-print(f"Quintuple wars: {wars[4]}")
-print(f"Sextuple wars: {wars[5]}")
-print(f"Septuple wars: {wars[6]}")
+print("Wars:")
+if wars[0] != 0:
+    print(f"{wars[0]} single wars")
+for i in wars[1:]:
+    print(f"{wars[wars.index(i)]} {war_names[wars.index(i)].lower()} wars - took {war_first_occurence[wars.index(i) - 1]} games to occur")
