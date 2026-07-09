@@ -197,10 +197,10 @@ while total_timer > 0:
 print("-----------------------")
 print(f"Total time simulated: {str(datetime.timedelta(minutes = desired_minutes))}")
 print(f"Simulation runtime: {str(datetime.timedelta(seconds = time.time() - start_time))}")
+print(f"Shortest game: {str(datetime.timedelta(seconds = shortest))}")
 print(f"{'{:,}'.format(game_number)} games were played")
 print(f"Player 1 won {round((p1_wins/game_number) * 100, 5)}% of the time ({'{:,}'.format(p1_wins)} time(s)), while Player 2 won {round((p2_wins/game_number) * 100, 5)}% of the time ({'{:,}'.format(p2_wins)} time(s))")    
 print(f"Ties happened {round((ties/game_number) * 100, 5)}% of the time ({'{:,}'.format(ties)} time(s))")
-print(f"The shortest game took {round(shortest / 60)} minute(s) and {shortest % 60} second(s)")
 print("Wars:")
 if wars[0] != 0:
     print(f"{'{:,}'.format(wars[0])} single war(s)")
