@@ -10,10 +10,8 @@ war_num = 0
 p1_wins = 0
 p2_wins = 0
 ties = 0
-ninety_six = 0
 shortest = 600
 deck = []
-war_first_occurence = []
 wars = []
 hierarchy = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"]
 war_names = ["Single", "Double", "Triple", "Quadruple", "Quintuple", "Sextuple", "Septuple"]
@@ -95,8 +93,6 @@ def war():
             if war_num == len(wars):
                 wars.append(0)
             wars[war_num] += 1
-            if war_num - 1 == len(war_first_occurence):
-                war_first_occurence.append(game_number)
             if printing_on == True:
                 print(war_names[war_num] + " War!!")
             war()
@@ -132,8 +128,6 @@ def scoring():
             p2_score += 3
         elif i.split("_")[0] == "Ace":
             p2_score += 5
-    if p1_score == 96 or p2_score == 96:
-        ninety_six += 1
     if p1_score > p2_score:
         if printing_on == True:
             print(f"Player 1 wins, {p1_score} to {p2_score}")
@@ -233,13 +227,11 @@ for i in range(desired_games):
             print("Player 1 ran out of cards!")
             print("Player 2 wins, 96 to 0")
         p2_wins += 1
-        ninety_six += 1
     elif len(p2_draw) == 0 and len(p2_collect) == 0:
         if printing_on == True:    
             print("Player 2 ran out of cards!")
             print("Player 1 wins, 96 to 0")
         p1_wins += 1
-        ninety_six += 1
     else:
         if printing_on == True:
             print("Calculating scores...")
@@ -254,10 +246,9 @@ print("-----------------------")
 print(f"Simulation took {time.time() - start_time} seconds")
 print(f"Player 1 won {round((p1_wins/desired_games) * 100, 5)}% of the time ({p1_wins} times), while Player 2 won {round((p2_wins/desired_games) * 100, 5)}% of the time ({p2_wins} time(s))")    
 print(f"Ties happened {round((ties/desired_games) * 100, 5)}% of the time ({ties} time(s))")
-print(f"There were {ninety_six} 96 to 0 game(s) (Happened {round((ninety_six/desired_games) * 100)}% of the time)")
 print(f"The shortest game took {round(shortest / 60)} minute(s) and {shortest % 60} second(s)")
 print("Wars:")
 if wars[0] != 0:
     print(f"{wars[0]} single wars")
 for i in wars[1:]:
-    print(f"{wars[wars.index(i)]} {war_names[wars.index(i)].lower()} wars - took {war_first_occurence[wars.index(i) - 1]} games to occur")
+    print(f"{wars[wars.index(i)]} {war_names[wars.index(i)].lower()} wars")
