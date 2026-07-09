@@ -11,6 +11,7 @@ p1_wins = 0
 p2_wins = 0
 ties = 0
 shortest = 600
+game_number = 0
 deck = []
 wars = []
 hierarchy = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"]
@@ -98,6 +99,7 @@ def scoring():
     global p1_wins
     global p2_wins
     global ties
+    global total_timer
     for i in p1_total:
         if i.split("_")[0] == "Jack":
             p1_score += 1
@@ -122,26 +124,29 @@ def scoring():
         p2_wins += 1
     elif p1_score == p2_score:
         ties += 1
+    total_timer -= points_time
+    
 print("Welcome to the 96 Simulator!")
-desired_games = input("Please enter the number of games you'd like to simulate - up to 100,000 ")
+desired_minutes = input("Please enter how many minutes of gameplay you'd like to simulate ")
 while True:
     try:
-        desired_games = int(desired_games)
+        desired_minutes = int(desired_minutes)
     except ValueError:
-        desired_games = input("Please enter a valid input ")
+        desired_minutes = input("Please enter a valid input ")
         continue
     else:
-        if desired_games > 100000 or desired_games <= 0:
-            desired_games = input("Please enter a valid input ")
+        if desired_minutes > 10000000 or desired_minutes <= 0:
+            desired_minutes = input("Please enter a valid input ")
             continue
         else:
             break
+total_timer = desired_minutes * 60
 start_time = time.time()
 assemble_deck()
-for i in range(desired_games):
+while total_timer > 0:
     beginning_time = random.randrange(5, 10) * 60
     timer = beginning_time
-    game_number = i + 1
+    game_number += 1
     p1_collect = []
     p2_collect = []
     p1_draw = []
@@ -172,27 +177,30 @@ for i in range(desired_games):
                 wars.append(0)
             wars[0] += 1
             war()
-    if timer > 0:
-       if beginning_time - timer < shortest:
-           shortest = beginning_time - timer 
+    if timer < 0:
+        timer = 0
+    if beginning_time - timer < shortest:
+        shortest = beginning_time - timer
+    total_timer -= beginning_time - timer 
     if len(p1_draw) == 0 and len(p1_collect) == 0:
         p2_wins += 1
     elif len(p2_draw) == 0 and len(p2_collect) == 0:
         p1_wins += 1
     else:
         scoring()
-    if i != desired_games - 1:
-        print(f"Simulated {i + 1} of {desired_games} games")
+    if total_timer > 0:
+        print(f"Simulated {round(desired_minutes - total_timer / 60)} of {desired_minutes} minutes")
         print("\033[1A", end = "\x1b[2K")
     else:
-        print(f"Simulated {i + 1} of {desired_games} games", end = "\n")
+        print(f"Simulated {desired_minutes} of {desired_minutes} minutes", end = "\n")
 print("-----------------------")
 print(f"Simulation took {time.time() - start_time} seconds")
-print(f"Player 1 won {round((p1_wins/desired_games) * 100, 5)}% of the time ({p1_wins} times), while Player 2 won {round((p2_wins/desired_games) * 100, 5)}% of the time ({p2_wins} time(s))")    
-print(f"Ties happened {round((ties/desired_games) * 100, 5)}% of the time ({ties} time(s))")
+print(f"{game_number} games were played")
+print(f"Player 1 won {round((p1_wins/game_number) * 100, 5)}% of the time ({p1_wins} times), while Player 2 won {round((p2_wins/game_number) * 100, 5)}% of the time ({p2_wins} time(s))")    
+print(f"Ties happened {round((ties/game_number) * 100, 5)}% of the time ({ties} time(s))")
 print(f"The shortest game took {round(shortest / 60)} minute(s) and {shortest % 60} second(s)")
 print("Wars:")
 if wars[0] != 0:
-    print(f"{wars[0]} single wars")
+    print(f"{wars[0]} single war(s)")
 for i in wars[1:]:
-    print(f"{wars[wars.index(i)]} {war_names[wars.index(i)].lower()} wars")
+    print(f"{wars[wars.index(i)]} {war_names[wars.index(i)].lower()} war(s)")
