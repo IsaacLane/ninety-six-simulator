@@ -1,5 +1,6 @@
 import random
 import time
+import datetime
 shuffle_time = 15
 deal_time = 26
 play_time = 1
@@ -194,7 +195,8 @@ while total_timer > 0:
     else:
         print(f"Simulated {desired_minutes} of {desired_minutes} minutes", end = "\n")
 print("-----------------------")
-print(f"Simulation took {time.time() - start_time} seconds")
+print(f"Total time simulated: {str(datetime.timedelta(minutes = desired_minutes))}")
+print(f"Simulation runtime: {str(datetime.timedelta(seconds = time.time() - start_time))}")
 print(f"{'{:,}'.format(game_number)} games were played")
 print(f"Player 1 won {round((p1_wins/game_number) * 100, 5)}% of the time ({'{:,}'.format(p1_wins)} time(s)), while Player 2 won {round((p2_wins/game_number) * 100, 5)}% of the time ({'{:,}'.format(p2_wins)} time(s))")    
 print(f"Ties happened {round((ties/game_number) * 100, 5)}% of the time ({'{:,}'.format(ties)} time(s))")
