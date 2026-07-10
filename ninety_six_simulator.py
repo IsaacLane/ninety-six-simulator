@@ -13,6 +13,10 @@ p2_wins = 0
 ties = 0
 ninety_six = 0
 shortest = 600
+ace_war = int()
+ace_war_count = 0
+two_war = int()
+two_war_count = 0
 deck = []
 war_first_occurence = []
 wars = []
@@ -55,8 +59,7 @@ def check_reshuffle_draw():
         p2_draw.extend(p2_collect)
         p2_collect.clear()
 def war():
-    global timer
-    global war_num
+    global timer, war_num, ace_war, ace_war_count, two_war, two_war_count
     try:
         for i in range(4):
             p1_war.append(p1_draw[0])
@@ -65,6 +68,14 @@ def war():
             p2_draw.pop(0)
             check_reshuffle_draw()
         timer -= war_time
+        if "Ace" in p1_war[0] and "Ace" in p1_draw[0] and "Ace" in p2_war[0] and "Ace" in p2_draw[0]:
+            if not ace_war:
+                ace_war = game_number
+            ace_war_count += 1
+        elif "2" in p1_war[0] and "2" in p1_draw[0] and "2" in p2_war[0] and "2" in p2_draw[0]:
+            if not two_war:
+                two_war = game_number
+            two_war_count += 1
         if hierarchy.index((p1_draw[0]).split("_")[0]) > hierarchy.index((p2_draw[0]).split("_")[0]):
             if printing_on == True:
                 print(f"Player 1's {(p1_draw[0]).split("_")[0]} of {(p1_draw[0]).split("_")[1]} beats Player 2's {(p2_draw[0]).split("_")[0]} of {(p2_draw[0]).split("_")[1]}")
@@ -112,9 +123,7 @@ def scoring():
     p2_total = p2_draw + p2_collect + p2_war
     p1_score = len(p1_total)
     p2_score = len(p2_total)
-    global p1_wins
-    global p2_wins
-    global ties
+    global p1_wins, p2_wins, ties
     for i in p1_total:
         if i.split("_")[0] == "Jack":
             p1_score += 1
@@ -256,6 +265,14 @@ print(f"Simulation runtime: {str(datetime.timedelta(seconds = time.time() - star
 print(f"Shortest game: {str(datetime.timedelta(seconds = shortest))}")
 print(f"Player 1 won {round((p1_wins/desired_games) * 100, 5)}% of the time ({'{:,}'.format(p1_wins)} times), while Player 2 won {round((p2_wins/desired_games) * 100, 5)}% of the time ({'{:,}'.format(p2_wins)} time(s))")    
 print(f"Ties happened {round((ties/desired_games) * 100, 5)}% of the time ({'{:,}'.format(ties)} time(s))")
+if ace_war:
+    print(f"There were {ace_war_count} double wars with 4 aces - it took {ace_war} games for one to occur")
+else:
+    print("There were no double wars with 4 aces")
+if two_war:
+    print(f"There were {two_war_count} double wars with 4 twos - it took {two_war} games for one to occur")
+else:
+    print("There were no double wars with 4 twos")
 print(f"There were {'{:,}'.format(ninety_six)} 96 to 0 game(s) (Happened {round((ninety_six/desired_games) * 100, 5)}% of the time)")
 print("Wars:")
 if wars[0] != 0:
