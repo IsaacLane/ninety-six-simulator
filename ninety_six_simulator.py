@@ -1,5 +1,6 @@
 import random
 import time
+import datetime
 shuffle_time = 15
 deal_time = 26
 play_time = 1
@@ -251,13 +252,13 @@ for i in range(desired_games):
         else:
             print(f"Simulated {i + 1} of {desired_games} games", end = "\n")
 print("-----------------------")
-print(f"Simulation took {time.time() - start_time} seconds")
+print(f"Simulation runtime: {str(datetime.timedelta(seconds = time.time() - start_time))}")
+print(f"Shortest game: {str(datetime.timedelta(seconds = shortest))}")
 print(f"Player 1 won {round((p1_wins/desired_games) * 100, 5)}% of the time ({'{:,}'.format(p1_wins)} times), while Player 2 won {round((p2_wins/desired_games) * 100, 5)}% of the time ({'{:,}'.format(p2_wins)} time(s))")    
 print(f"Ties happened {round((ties/desired_games) * 100, 5)}% of the time ({'{:,}'.format(ties)} time(s))")
-print(f"There were {'{:,}'.format(ninety_six)} 96 to 0 game(s) (Happened {round((ninety_six/desired_games) * 100)}% of the time)")
-print(f"The shortest game took {round(shortest / 60)} minute(s) and {shortest % 60} second(s)")
+print(f"There were {'{:,}'.format(ninety_six)} 96 to 0 game(s) (Happened {round((ninety_six/desired_games) * 100, 5)}% of the time)")
 print("Wars:")
 if wars[0] != 0:
-    print(f"{'{:,}'.format(wars[0])} single wars")
+    print(f"{'{:,}'.format(wars[0])} single war(s)")
 for i in wars[1:]:
-    print(f"{'{:,}'.format(wars[wars.index(i)])} {war_names[wars.index(i)].lower()} wars - took {'{:,}'.format(war_first_occurence[wars.index(i) - 1])} games to occur")
+    print(f"{'{:,}'.format(wars[wars.index(i)])} {war_names[wars.index(i)].lower()} war(s) - took {'{:,}'.format(war_first_occurence[wars.index(i) - 1])} game(s) to occur")
