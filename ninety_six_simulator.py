@@ -125,22 +125,22 @@ def scoring():
     p2_score = len(p2_total)
     global p1_wins, p2_wins, ties
     for i in p1_total:
-        if i.split("_")[0] == "Jack":
+        if "Jack" in i:
             p1_score += 1
-        elif i.split("_")[0] == "Queen":
+        elif "Queen" in i:
             p1_score += 2
-        elif i.split("_")[0] == "King":
+        elif "King" in i:
             p1_score += 3
-        elif i.split("_")[0] == "Ace":
+        elif "Ace" in i:
             p1_score += 5
     for i in p2_total:
-        if i.split("_")[0] == "Jack":
+        if "Jack" in i:
             p2_score += 1
-        elif i.split("_")[0] == "Queen":
+        elif "Queen" in i:
             p2_score += 2
-        elif i.split("_")[0] == "King":
+        elif "King" in i:
             p2_score += 3
-        elif i.split("_")[0] == "Ace":
+        elif "Ace" in i:
             p2_score += 5
     if p1_score == 96 or p2_score == 96:
         ninety_six += 1
@@ -271,7 +271,6 @@ print(f"Games to occur: {'{:,}'.format(ace_war)}")
 print(f"Double wars with 4 twos: {'{:,}'.format(two_war_count)}")
 print(f"Games to occur: {'{:,}'.format(two_war)}")
 print(f"96 to 0 games: {'{:,}'.format(ninety_six)} ({round((ninety_six/desired_games) * 100, 5)}%)")
-print("Wars:")
 if wars[0] != 0:
     print(f"Single wars: {'{:,}'.format(wars[0])}")
 for i in wars[1:]:
