@@ -256,26 +256,24 @@ for i in range(desired_games):
         scoring()
     if printing_on == False:
         if i != desired_games - 1:
-            print(f"Simulated {i + 1} of {desired_games} games")
+            print(f"{i + 1} of {desired_games} games simulated")
             print("\033[1A", end = "\x1b[2K")
         else:
-            print(f"Simulated {i + 1} of {desired_games} games", end = "\n")
+            print(f"{i + 1} of {desired_games} games simulated", end = "\n")
 print("-----------------------")
 print(f"Simulation runtime: {str(datetime.timedelta(seconds = time.time() - start_time))}")
 print(f"Shortest game: {str(datetime.timedelta(seconds = shortest))}")
-print(f"Player 1 won {round((p1_wins/desired_games) * 100, 5)}% of the time ({'{:,}'.format(p1_wins)} times), while Player 2 won {round((p2_wins/desired_games) * 100, 5)}% of the time ({'{:,}'.format(p2_wins)} time(s))")    
-print(f"Ties happened {round((ties/desired_games) * 100, 5)}% of the time ({'{:,}'.format(ties)} time(s))")
-if ace_war:
-    print(f"There were {ace_war_count} double wars with 4 aces - it took {ace_war} games for one to occur")
-else:
-    print("There were no double wars with 4 aces")
-if two_war:
-    print(f"There were {two_war_count} double wars with 4 twos - it took {two_war} games for one to occur")
-else:
-    print("There were no double wars with 4 twos")
-print(f"There were {'{:,}'.format(ninety_six)} 96 to 0 game(s) (Happened {round((ninety_six/desired_games) * 100, 5)}% of the time)")
+print(f"Player 1 wins: {'{:,}'.format(p1_wins)} ({round((p1_wins/desired_games) * 100, 5)}%)") 
+print(f"Player 2 wins: {'{:,}'.format(p2_wins)} ({round((p2_wins/desired_games) * 100, 5)}%)") 
+print(f"Ties: {'{:,}'.format(ties)} ({round((ties/desired_games) * 100, 5)}%)")
+print(f"Double wars with 4 aces: {'{:,}'.format(ace_war_count)}")
+print(f"Games to occur: {'{:,}'.format(ace_war)}")
+print(f"Double wars with 4 twos: {'{:,}'.format(two_war_count)}")
+print(f"Games to occur: {'{:,}'.format(two_war)}")
+print(f"96 to 0 games: {'{:,}'.format(ninety_six)} ({round((ninety_six/desired_games) * 100, 5)}%)")
 print("Wars:")
 if wars[0] != 0:
-    print(f"{'{:,}'.format(wars[0])} single war(s)")
+    print(f"Single wars: {'{:,}'.format(wars[0])}")
 for i in wars[1:]:
-    print(f"{'{:,}'.format(wars[wars.index(i)])} {war_names[wars.index(i)].lower()} war(s) - took {'{:,}'.format(war_first_occurence[wars.index(i) - 1])} game(s) to occur")
+    print(f"{war_names[wars.index(i)]} wars: {'{:,}'.format(wars[wars.index(i)])}")
+    print(f"Games to occur: {'{:,}'.format(war_first_occurence[wars.index(i) - 1])}")
