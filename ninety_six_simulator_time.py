@@ -50,8 +50,7 @@ def check_reshuffle_draw():
         p2_draw.extend(p2_collect)
         p2_collect.clear()
 def war():
-    global timer
-    global war_num
+    global timer, war_num
     try:
         for i in range(4):
             p1_war.append(p1_draw[0])
@@ -97,10 +96,7 @@ def scoring():
     p2_total = p2_draw + p2_collect + p2_war
     p1_score = len(p1_total)
     p2_score = len(p2_total)
-    global p1_wins
-    global p2_wins
-    global ties
-    global total_timer
+    global p1_wins, p2_wins, ties, total_timer
     for i in p1_total:
         if i.split("_")[0] == "Jack":
             p1_score += 1
