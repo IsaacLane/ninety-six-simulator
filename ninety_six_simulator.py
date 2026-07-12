@@ -19,6 +19,7 @@ two_war = int()
 two_war_count = 0
 four_aces = 0
 four_aces_win = 0
+ended_early = 0
 deck = []
 war_first_occurence = []
 wars = []
@@ -246,12 +247,15 @@ for i in range(desired_games):
                 wars.append(0)
             wars[0] += 1
             war()
-    if timer <= 0:
+    if timer < 0:
+        timer = 0
+    if timer == 0:
        if printing_on == True: 
            print("Time is up!")
     else:
-       if desired_time - timer < shortest:
-           shortest = desired_time - timer 
+        ended_early += 1
+    if desired_time - timer < shortest:
+        shortest = desired_time - timer 
     if len(p1_draw) == 0 and len(p1_collect) == 0:
         if printing_on == True:
             print("Player 1 ran out of cards!")
@@ -281,7 +285,10 @@ print(f"Player 1 wins: {'{:,}'.format(p1_wins)} ({round((p1_wins/desired_games) 
 print(f"Player 2 wins: {'{:,}'.format(p2_wins)} ({round((p2_wins/desired_games) * 100, 5)}%)") 
 print(f"Ties: {'{:,}'.format(ties)} ({round((ties/desired_games) * 100, 5)}%)")
 print(f"96 to 0 games: {'{:,}'.format(ninety_six)} ({round((ninety_six/desired_games) * 100, 5)}%)")
-print(f"Games where someone has 4 aces: {'{:,}'.format(four_aces)} ({round((four_aces/desired_games) * 100, 5)}%) (person won {'{:,}'.format(four_aces_win)} times [{round((four_aces_win/four_aces)* 100, 5)}%])")
+if four_aces != 0:
+    print(f"Games where someone has 4 aces: {'{:,}'.format(four_aces)} ({round((four_aces/desired_games) * 100, 5)}%) (wins in this situation: {'{:,}'.format(four_aces_win)} [{round((four_aces_win/four_aces)* 100, 5)}%])")
+else:
+    print("Games where someone has 4 aces: 0")
 if wars[0] != 0:
     print(f"Single wars: {'{:,}'.format(wars[0])}")
 for i in wars[1:]:
