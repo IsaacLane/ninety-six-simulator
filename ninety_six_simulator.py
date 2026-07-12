@@ -17,6 +17,8 @@ ace_war = int()
 ace_war_count = 0
 two_war = int()
 two_war_count = 0
+four_aces = 0
+four_aces_win = 0
 deck = []
 war_first_occurence = []
 wars = []
@@ -119,11 +121,13 @@ def war():
 def scoring():
     p1_score = 0
     p2_score = 0
+    p1_aces = 0
+    p2_aces = 0
     p1_total = p1_draw + p1_collect + p1_war
     p2_total = p2_draw + p2_collect + p2_war
     p1_score = len(p1_total)
     p2_score = len(p2_total)
-    global p1_wins, p2_wins, ties
+    global p1_wins, p2_wins, ties, four_aces, four_aces_win
     for i in p1_total:
         if "Jack" in i:
             p1_score += 1
@@ -133,6 +137,9 @@ def scoring():
             p1_score += 3
         elif "Ace" in i:
             p1_score += 5
+            p1_aces += 1
+    if p1_aces == 4:
+        four_aces += 1
     for i in p2_total:
         if "Jack" in i:
             p2_score += 1
@@ -142,16 +149,23 @@ def scoring():
             p2_score += 3
         elif "Ace" in i:
             p2_score += 5
+            p2_aces += 1
+    if p2_aces == 4:
+        four_aces += 1
     if p1_score == 96 or p2_score == 96:
         ninety_six += 1
     if p1_score > p2_score:
         if printing_on == True:
             print(f"Player 1 wins, {p1_score} to {p2_score}")
         p1_wins += 1
+        if p1_aces == 4:
+            four_aces_win += 1
     elif p1_score < p2_score:
         if printing_on == True:
             print(f"Player 2 wins, {p2_score} to {p1_score}")
         p2_wins += 1
+        if p2_aces == 4:
+            four_aces_win += 1
     elif p1_score == p2_score:
         if printing_on == True:
             print("It's a tie - 48 to 48 :O")
@@ -266,10 +280,11 @@ print(f"Shortest game: {str(datetime.timedelta(seconds = shortest))}")
 print(f"Player 1 wins: {'{:,}'.format(p1_wins)} ({round((p1_wins/desired_games) * 100, 5)}%)") 
 print(f"Player 2 wins: {'{:,}'.format(p2_wins)} ({round((p2_wins/desired_games) * 100, 5)}%)") 
 print(f"Ties: {'{:,}'.format(ties)} ({round((ties/desired_games) * 100, 5)}%)")
-print(f"Double wars with 4 aces: {'{:,}'.format(ace_war_count)} - games to occur: {'{:,}'.format(ace_war)}")
-print(f"Double wars with 4 twos: {'{:,}'.format(two_war_count)} - games to occur: {'{:,}'.format(two_war)}")
 print(f"96 to 0 games: {'{:,}'.format(ninety_six)} ({round((ninety_six/desired_games) * 100, 5)}%)")
+print(f"Games where someone has 4 aces: {'{:,}'.format(four_aces)} ({round((four_aces/desired_games) * 100, 5)}%) (person won {'{:,}'.format(four_aces_win)} times [{round((four_aces_win/four_aces)* 100, 5)}%])")
 if wars[0] != 0:
     print(f"Single wars: {'{:,}'.format(wars[0])}")
 for i in wars[1:]:
     print(f"{war_names[wars.index(i)]} wars: {'{:,}'.format(wars[wars.index(i)])} - games to occur: {'{:,}'.format(war_first_occurence[wars.index(i) - 1])}")
+print(f"Double wars with 4 aces: {'{:,}'.format(ace_war_count)} - games to occur: {'{:,}'.format(ace_war)}")
+print(f"Double wars with 4 twos: {'{:,}'.format(two_war_count)} - games to occur: {'{:,}'.format(two_war)}")
