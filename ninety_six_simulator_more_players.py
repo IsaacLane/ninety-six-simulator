@@ -1,6 +1,4 @@
-import random
-import time
-import datetime
+import random, time, datetime, math
 shuffle_time = 15
 deal_time = 26
 play_time = 1
@@ -20,32 +18,51 @@ two_war_count = 0
 four_aces = 0
 four_aces_win = 0
 ended_early = 0
+war_number_players = 0
+card = 0
+player_data = {}
 deck = []
 war_first_occurence = []
 wars = []
+compare = []
+war_players = []
+leftover_cards = []
+players = []
+force_war = False
 hierarchy = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"]
 war_names = ["Single", "Double", "Triple", "Quadruple", "Quintuple", "Sextuple", "Septuple"]
 def assemble_deck():
-    for i in range(4):
-        for i in range(2, 11):
-            deck.append(str(i) + "_")
-        deck.append("Jack_")
-        deck.append("Queen_")
-        deck.append("King_")
-        deck.append("Ace_")
-    for i in range(13):
-        deck[i] = deck[i] + "Spades"
-    for i in range(13, 26):
-        deck[i] = deck[i] + "Hearts"
-    for i in range(26, 40):
-        deck[i] = deck[i] + "Diamonds"
-    for i in range(40, 52):
-        deck[i] = deck[i] + "Clubs"
+    global deck
+    if force_war == False:
+        for i in range(4):
+            for i in range(2, 11):
+                deck.append(str(i) + "_")
+            deck.append("Jack_")
+            deck.append("Queen_")
+            deck.append("King_")
+            deck.append("Ace_")
+        for i in range(13):
+            deck[i] = deck[i] + "Spades"
+        for i in range(13, 26):
+            deck[i] = deck[i] + "Hearts"
+        for i in range(26, 40):
+            deck[i] = deck[i] + "Diamonds"
+        for i in range(40, 52):
+            deck[i] = deck[i] + "Clubs"
+    else:
+        deck = ['Ace_Spades', '2_Spades', '3_Spades', '4_Spades', '5_Spades', '6_Spades', '7_Spades', '8_Spades', '9_Spades', '10_Spades', 'Ace_Hearts', 'Jack_Spades', 'Queen_Spades', 'King_Spades', '2_Hearts', '3_Hearts', '4_Hearts', '5_Hearts', '6_Hearts', '7_Hearts', '8_Hearts', '9_Hearts', '10_Hearts', 'Jack_Hearts', 'Queen_Hearts', 'King_Hearts', '2_Diamonds', '3_Diamonds', '4_Diamonds', '5_Diamonds', '6_Diamonds', '7_Diamonds', '8_Diamonds', '9_Diamonds', '10_Diamonds', 'Jack_Diamonds', 'Queen_Diamonds', 'King_Diamonds', 'Ace_Diamonds', '2_Diamonds', '3_Clubs', '4_Clubs', '5_Clubs', '6_Clubs', '7_Clubs', '8_Clubs', '9_Clubs', '10_Clubs', 'Jack_Clubs', 'Queen_Clubs', 'King_Clubs', 'Ace_Clubs']
 def deal():
-    for i in range(26):
-        p1_draw.append(deck[i])
-    for i in range(26, 52):
-        p2_draw.append(deck[i])
+    global leftover_cards
+    for i in player_data["draw"].values():
+        i.extend(deck[0:math.floor(52/num_players)])
+        del deck[0:math.floor(52/num_players)]
+    leftover_cards = deck
+    print("Leftover cards:")
+    print(leftover_cards)
+    #for i in range(26):
+        #p1_draw.append(deck[i])
+    #for i in range(26, 52):
+        #p2_draw.append(deck[i])
     global timer
     timer -= deal_time
 def check_reshuffle_draw():
@@ -62,7 +79,46 @@ def check_reshuffle_draw():
         p2_draw.extend(p2_collect)
         p2_collect.clear()
 def war():
-    global timer, war_num, ace_war, ace_war_count, two_war, two_war_count
+    global timer, war_num, ace_war, ace_war_count, two_war, two_war_count, war_players, card, first_round
+    card = 0
+    compare.clear()
+    for x in war_players:
+        for y in range(4):
+            if len(player_data["draw"][x]) == 0:
+                continue
+            player_data["war"][x].append(player_data["draw"][x].pop(0))
+    print("Player data after war cards distributed")
+    print(player_data)
+    for i in war_players:
+        if len(player_data["draw"][i]) == 0:
+            continue
+        compare.append(player_data["draw"][i][0] + "_" + i)
+    compare.sort(reverse=True, key=sort)
+    print("Cards being compared (within war)")
+    print(compare)
+    if hierarchy.index((compare[card]).split("_")[0]) == hierarchy.index((compare[card + 1]).split("_")[0]):
+        card += 1
+        same_top_card()
+        war_players = list(set(war_players))
+        print("war")
+        war()
+    else:
+        print("no war")
+        player_data["collect"][compare[0].split("_")[2]].extend(player_data["draw"][i][0] for i in war_players)
+        if first_round == True:
+            player_data["collect"][compare[0].split("_")[2]].extend(leftover_cards)
+            first_round == False
+        for i in war_players:
+            player_data["collect"][compare[0].split("_")[2]].extend(player_data["war"][i])
+        for i in players:
+            player_data["draw"][i].pop(0)
+        compare.clear()
+        war_players.clear()
+        for i in player_data["war"].values():
+            i.clear()
+        print("Player data after war ends")
+        print(player_data)
+    """
     try:
         for i in range(4):
             p1_war.append(p1_draw[0])
@@ -119,6 +175,7 @@ def war():
         if printing_on == True:
             print("Game ends due to insufficient cards for War")
         return "insufficient_cards_for_war"
+    """
 def scoring():
     p1_score = 0
     p2_score = 0
@@ -171,6 +228,15 @@ def scoring():
         if printing_on == True:
             print("It's a tie - 48 to 48 :O")
         ties += 1
+def sort(e):
+    return hierarchy.index(e.split("_")[0])
+def same_top_card():
+    global card
+    if hierarchy.index((compare[card]).split("_")[0]) == hierarchy.index((compare[card + 1]).split("_")[0]):
+        war_players.append(compare[card].split("_")[2])
+        war_players.append(compare[card + 1].split("_")[2])
+        card += 1
+        same_top_card()
 print("Welcome to the 96 Simulator!")
 desired_games = input("Please enter the number of games you'd like to simulate - up to 100,000 ")
 while True:
@@ -185,6 +251,28 @@ while True:
             continue
         else:
             break
+
+num_players = input("Please enter how many players you'd like to be playing - up to 10 ")
+while True:
+    try:
+        num_players = int(num_players)
+    except ValueError:
+        num_players = input("Please enter a valid input ")
+        continue
+    else:
+        if num_players > 10 or num_players <= 1:
+            num_players = input("Please enter a valid input ")
+            continue
+        else:
+            break
+player_data["collect"] = {}
+player_data["draw"] = {}
+player_data["war"] = {}
+for i in range(num_players):
+    player_data["collect"]["p" + str(i + 1)] = []
+    player_data["draw"]["p" + str(i + 1)] = []
+    player_data["war"]["p" + str(i + 1)] = []
+    players.append("p" + str(i + 1))               
 desired_time = input("Please enter how many minutes per game you'd like - between 5 and 10 minutes inclusive (enter 'random' to pick randomly each game) ")
 while not (desired_time == "5" or desired_time == "6" or desired_time == "7" or desired_time == "8" or desired_time == "9" or desired_time == "10" or desired_time.lower() == "random"):
     desired_time = input("Please enter a valid input ")
@@ -200,6 +288,7 @@ else:
 start_time = time.time()
 assemble_deck()
 for i in range(desired_games):
+    first_round = True
     if str(desired_time).lower() == "random":
         desired_time = random.randrange(5, 10) * 60
     timer = desired_time
@@ -212,16 +301,46 @@ for i in range(desired_games):
     p2_war = []
     if printing_on == True:
         print("Shuffling deck...")
-    random.shuffle(deck)
+    if force_war == False:
+        random.shuffle(deck)
     timer -= shuffle_time
     if printing_on == True:
         print("Dealing cards...")
     deal()
     if printing_on == True:
         print(f"Starting game number {game_number}")
+    print("Original player data")
+    print(player_data)
+    for i in players:
+        compare.append(player_data["draw"][i][0] + "_" + i)
+    compare.sort(reverse=True, key=sort)
+    print("Cards being compared")
+    print(compare)
+    if hierarchy.index((compare[card]).split("_")[0]) == hierarchy.index((compare[card + 1]).split("_")[0]):
+        war_players.append(compare[card].split("_")[2])
+        war_players.append(compare[card + 1].split("_")[2])
+        card += 1
+        same_top_card()
+        war_players = list(set(war_players))
+        print("war")
+        print("war players")
+        print(war_players)
+        war()
+    else:
+        print("no war")
+        player_data["collect"][compare[0].split("_")[2]].extend(i.rpartition("_")[0] for i in compare)
+        if first_round == True:
+            player_data["collect"][compare[0].split("_")[2]].extend(leftover_cards)
+            first_round == False
+        for i in players:
+            player_data["draw"][i].pop(0)
+        compare.clear()
+        print("Player data")
+        print(player_data)
+    """
     while not ((len(p1_draw) == 0 and len(p1_collect) == 0) or (len(p2_draw) == 0 and len(p2_collect) == 0) or
     timer <= 0 or war == "insufficient_cards_for_war"):
-        check_reshuffle_draw()
+        check_reshuffle_draw()        
         if hierarchy.index((p1_draw[0]).split("_")[0]) > hierarchy.index((p2_draw[0]).split("_")[0]):
             if printing_on == True:
                 print(f"Player 1's {(p1_draw[0]).split("_")[0]} of {(p1_draw[0]).split("_")[1]} beats Player 2's {(p2_draw[0]).split("_")[0]} of {(p2_draw[0]).split("_")[1]}")
@@ -296,3 +415,4 @@ for i in wars[1:]:
     print(f"{war_names[wars.index(i)]} wars: {'{:,}'.format(wars[wars.index(i)])} - games to occur: {'{:,}'.format(war_first_occurence[wars.index(i) - 1])}")
 print(f"Double wars with 4 aces: {'{:,}'.format(ace_war_count)} - games to occur: {'{:,}'.format(ace_war)}")
 print(f"Double wars with 4 twos: {'{:,}'.format(two_war_count)} - games to occur: {'{:,}'.format(two_war)}")
+"""
