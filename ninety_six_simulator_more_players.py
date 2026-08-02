@@ -21,7 +21,7 @@ ended_early = 0
 war_number_players = 0
 card = 0
 player_data = {}
-deck = []
+score_data = {}
 war_first_occurence = []
 wars = []
 compare = []
@@ -188,7 +188,7 @@ def no_war():
         print("first round has been set to false")
     for i in og_players:
         player_data["collect"][compare[0].split("_")[2]].extend(player_data["war"][i])
-    for i in players:
+    for i in war_players:
         player_data["draw"][i].pop(0)
     timer -= gather_time
     compare.clear()
@@ -198,6 +198,21 @@ def no_war():
     print("Player data after war ends")
     print(player_data)
 def scoring():
+    for i in og_players:
+        score_data["total"][i] = player_data["collect"][i] + player_data["draw"][i] + player_data["war"][i]
+        score_data["score"][i] = len(score_data["total"][i])
+    for key, values in score_data["total"].items():
+        for i in values:
+            if "Jack" in i:
+                score_data["score"][key] += 1
+            elif "Queen" in i:
+                score_data["score"][key] += 2
+            elif "King" in i:
+                score_data["score"][key] += 3
+            elif "Ace" in i:
+                score_data["score"][key] += 5
+    print(score_data["score"])
+    print(player_data)
     """
     p1_score = 0
     p2_score = 0
@@ -277,7 +292,7 @@ def check_for_dups():
     if len(dups) != 0:
         raise Exception(f"{dups} is duplicated")
 def check_for_removed():
-    cards_found = deck
+    cards_found = ['Ace_Spades', '2_Spades', '3_Spades', '4_Spades', '5_Spades', '6_Spades', '7_Spades', '8_Spades', '9_Spades', '10_Spades', 'Ace_Hearts', 'Jack_Spades', 'Queen_Spades', 'King_Spades', '2_Hearts', '3_Hearts', '4_Hearts', '5_Hearts', '6_Hearts', '7_Hearts', '8_Hearts', '9_Hearts', '10_Hearts', 'Jack_Hearts', 'Queen_Hearts', 'King_Hearts', '2_Diamonds', '3_Diamonds', '4_Diamonds', '5_Diamonds', '6_Diamonds', '7_Diamonds', '8_Diamonds', '9_Diamonds', '10_Diamonds', 'Jack_Diamonds', 'Queen_Diamonds', 'King_Diamonds', 'Ace_Diamonds', '2_Clubs', '3_Clubs', '4_Clubs', '5_Clubs', '6_Clubs', '7_Clubs', '8_Clubs', '9_Clubs', '10_Clubs', 'Jack_Clubs', 'Queen_Clubs', 'King_Clubs', 'Ace_Clubs']
     print("Checking for removed cards...")
     for x, d in player_data.items():
         for y, l in d.items():
@@ -286,6 +301,7 @@ def check_for_removed():
                     cards_found.remove(i)
     if len(cards_found) != 0:
         if extras == False:
+            print(player_data)
             raise Exception(f"{cards_found} was deleted (or this thing is broken :P)")
 print("Welcome to the 96 Simulator!")
 desired_games = input("Please enter the number of games you'd like to simulate - up to 100,000 ")
@@ -301,7 +317,6 @@ while True:
             continue
         else:
             break
-
 num_players = input("Please enter how many players you'd like to be playing - up to 10 ")
 while True:
     try:
@@ -318,10 +333,14 @@ while True:
 player_data["collect"] = {}
 player_data["draw"] = {}
 player_data["war"] = {}
+score_data["total"] = {}
+score_data["score"] = {}
 for i in range(num_players):
     player_data["collect"]["p" + str(i + 1)] = []
     player_data["draw"]["p" + str(i + 1)] = []
     player_data["war"]["p" + str(i + 1)] = []
+    score_data["total"]["p" + str(i + 1)] = []
+    score_data["score"]["p" + str(i + 1)] = 0
     players.append("p" + str(i + 1))
     og_players.append("p" + str(i + 1))               
 desired_time = input("Please enter how many minutes per game you'd like (enter 'random' to pick randomly each game) ")
