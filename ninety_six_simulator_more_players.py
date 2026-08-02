@@ -26,7 +26,7 @@ war_first_occurence = []
 wars = []
 compare = []
 war_players = []
-leftover_cards = []
+extra_cards = []
 players = []
 og_players = []
 force_war = False
@@ -34,14 +34,14 @@ hierarchy = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "Kin
 war_names = ["Single", "Double", "Triple", "Quadruple", "Quintuple", "Sextuple", "Septuple"]
 deck = ['Ace_Spades', '2_Spades', '3_Spades', '4_Spades', '5_Spades', '6_Spades', '7_Spades', '8_Spades', '9_Spades', '10_Spades', 'Ace_Hearts', 'Jack_Spades', 'Queen_Spades', 'King_Spades', '2_Hearts', '3_Hearts', '4_Hearts', '5_Hearts', '6_Hearts', '7_Hearts', '8_Hearts', '9_Hearts', '10_Hearts', 'Jack_Hearts', 'Queen_Hearts', 'King_Hearts', '2_Diamonds', '3_Diamonds', '4_Diamonds', '5_Diamonds', '6_Diamonds', '7_Diamonds', '8_Diamonds', '9_Diamonds', '10_Diamonds', 'Jack_Diamonds', 'Queen_Diamonds', 'King_Diamonds', 'Ace_Diamonds', '2_Clubs', '3_Clubs', '4_Clubs', '5_Clubs', '6_Clubs', '7_Clubs', '8_Clubs', '9_Clubs', '10_Clubs', 'Jack_Clubs', 'Queen_Clubs', 'King_Clubs', 'Ace_Clubs']
 def deal():
-    global leftover_cards
+    global extra_cards
     for i in player_data["draw"].values():
         i.extend(deck[0:math.floor(52/num_players)])
         del deck[0:math.floor(52/num_players)]
     check_for_dups()
-    leftover_cards = deck
+    extra_cards = deck
     print("Leftover cards:")
-    print(leftover_cards)
+    print(extra_cards)
     #for i in range(26):
         #p1_draw.append(deck[i])
     #for i in range(26, 52):
@@ -81,7 +81,7 @@ def check_empty_piles():
         p2_collect.clear()
     """
 def war():
-    global timer, war_num, ace_war, ace_war_count, two_war, two_war_count, war_players, card, first_round
+    global timer, war_num, ace_war, ace_war_count, two_war, two_war_count, war_players, card, extras, extra_cards
     card = 0
     compare.clear()
     for x in war_players[:]:
@@ -99,6 +99,10 @@ def war():
         check_empty_piles()
         if i in war_players:
             compare.append(player_data["draw"][i][0] + "_" + i)
+    if len(war_players) == 0:
+        extra_cards = [i for i in player_data["war"].values()]
+        extras = True
+        return
     compare.sort(reverse=True, key=sort)
     print("Cards being compared (within war)")
     print(compare)
@@ -173,14 +177,14 @@ def war():
         return "insufficient_cards_for_war"
     """
 def no_war():
-    global war_num, first_round, timer
+    global war_num, extras, timer
     print("no war")
     war_num = 1
     player_data["collect"][compare[0].split("_")[2]].extend(player_data["draw"][i][0] for i in war_players)
-    if first_round == True:
+    if extras == True:
         print("its the first round of the game... and its a waaar")
-        player_data["collect"][compare[0].split("_")[2]].extend(leftover_cards)
-        first_round = False
+        player_data["collect"][compare[0].split("_")[2]].extend(extra_cards)
+        extras = False
         print("first round has been set to false")
     for i in og_players:
         player_data["collect"][compare[0].split("_")[2]].extend(player_data["war"][i])
@@ -281,7 +285,7 @@ def check_for_removed():
                 if i in cards_found:
                     cards_found.remove(i)
     if len(cards_found) != 0:
-        if first_round == False:
+        if extras == False:
             raise Exception(f"{cards_found} was deleted (or this thing is broken :P)")
 print("Welcome to the 96 Simulator!")
 desired_games = input("Please enter the number of games you'd like to simulate - up to 100,000 ")
@@ -320,7 +324,7 @@ for i in range(num_players):
     player_data["war"]["p" + str(i + 1)] = []
     players.append("p" + str(i + 1))
     og_players.append("p" + str(i + 1))               
-desired_time = input("Please enter how many minutes per game you'd like (enter 'random' to pick randomly each game)")
+desired_time = input("Please enter how many minutes per game you'd like (enter 'random' to pick randomly each game) ")
 #while not (desired_time == "5" or desired_time == "6" or desired_time == "7" or desired_time == "8" or desired_time == "9" or desired_time == "10" or desired_time.lower() == "random"):
     #desired_time = input("Please enter a valid input ")
 if desired_time.lower() != "random":
@@ -334,7 +338,7 @@ else:
     printing_on = False
 start_time = time.time()
 for i in range(desired_games):
-    first_round = True
+    extras = True
     print("its the start of the for loop, and first round has been set to true")
     if str(desired_time).lower() == "random":
         desired_time = random.randrange(5, 10) * 60
@@ -382,12 +386,12 @@ for i in range(desired_games):
             war()
         else:
             print("no war")
-            print(first_round)
+            print(extras)
             player_data["collect"][compare[0].split("_")[2]].extend(i.rpartition("_")[0] for i in compare)
-            if first_round == True:
+            if extras == True:
                 print("its the first round of the game")
-                player_data["collect"][compare[0].split("_")[2]].extend(leftover_cards)
-                first_round = False
+                player_data["collect"][compare[0].split("_")[2]].extend(extra_cards)
+                extras = False
                 print("first round has been set to false")
             for i in players:
                 player_data["draw"][i].pop(0)
