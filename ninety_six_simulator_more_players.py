@@ -29,10 +29,11 @@ war_players = []
 extra_cards = []
 players = []
 og_players = []
+scores = []
+scores_players = []
 force_war = False
 hierarchy = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"]
 war_names = ["Single", "Double", "Triple", "Quadruple", "Quintuple", "Sextuple", "Septuple"]
-deck = ['Ace_Spades', '2_Spades', '3_Spades', '4_Spades', '5_Spades', '6_Spades', '7_Spades', '8_Spades', '9_Spades', '10_Spades', 'Ace_Hearts', 'Jack_Spades', 'Queen_Spades', 'King_Spades', '2_Hearts', '3_Hearts', '4_Hearts', '5_Hearts', '6_Hearts', '7_Hearts', '8_Hearts', '9_Hearts', '10_Hearts', 'Jack_Hearts', 'Queen_Hearts', 'King_Hearts', '2_Diamonds', '3_Diamonds', '4_Diamonds', '5_Diamonds', '6_Diamonds', '7_Diamonds', '8_Diamonds', '9_Diamonds', '10_Diamonds', 'Jack_Diamonds', 'Queen_Diamonds', 'King_Diamonds', 'Ace_Diamonds', '2_Clubs', '3_Clubs', '4_Clubs', '5_Clubs', '6_Clubs', '7_Clubs', '8_Clubs', '9_Clubs', '10_Clubs', 'Jack_Clubs', 'Queen_Clubs', 'King_Clubs', 'Ace_Clubs']
 def deal():
     global extra_cards
     for i in player_data["draw"].values():
@@ -99,10 +100,15 @@ def war():
         check_empty_piles()
         if i in war_players:
             compare.append(player_data["draw"][i][0] + "_" + i)
+    print(player_data["war"])
     if len(war_players) == 0:
-        extra_cards = [i for i in player_data["war"].values()]
+        print("no players left in war")
+        for i in player_data["war"].values():
+            extra_cards.extend(i)
+            i.clear()
         extras = True
         return
+    print(player_data["war"])
     compare.sort(reverse=True, key=sort)
     print("Cards being compared (within war)")
     print(compare)
@@ -179,15 +185,23 @@ def war():
 def no_war():
     global war_num, extras, timer
     print("no war")
+    print(player_data["war"])
     war_num = 1
     player_data["collect"][compare[0].split("_")[2]].extend(player_data["draw"][i][0] for i in war_players)
     if extras == True:
         print("its the first round of the game... and its a waaar")
         player_data["collect"][compare[0].split("_")[2]].extend(extra_cards)
         extras = False
+        extra_cards.clear()
         print("first round has been set to false")
+    print(player_data["war"])
+    print("Distributing war cards")
+    print(og_players)
     for i in og_players:
+        print(i)
+        print(player_data["war"][i])
         player_data["collect"][compare[0].split("_")[2]].extend(player_data["war"][i])
+    print(player_data)
     for i in war_players:
         player_data["draw"][i].pop(0)
     timer -= gather_time
@@ -198,6 +212,7 @@ def no_war():
     print("Player data after war ends")
     print(player_data)
 def scoring():
+    global ties
     for i in og_players:
         score_data["total"][i] = player_data["collect"][i] + player_data["draw"][i] + player_data["war"][i]
         score_data["score"][i] = len(score_data["total"][i])
@@ -211,7 +226,15 @@ def scoring():
                 score_data["score"][key] += 3
             elif "Ace" in i:
                 score_data["score"][key] += 5
+    score_data["score"] = dict(sorted(score_data["score"].items(), key=lambda x: x[1], reverse=True))
+    scores = list(score_data["score"].values())
+    scores_players = list(score_data["score"].keys())
+    if scores[0] == scores[1]:
+        ties += 1
+    else:
+        score_data["wins"][scores_players[0]] += 1
     print(score_data["score"])
+    print(scores)
     print(player_data)
     """
     p1_score = 0
@@ -290,7 +313,7 @@ def check_for_dups():
                 else:
                     seen.add(i)
     if len(dups) != 0:
-        raise Exception(f"{dups} is duplicated")
+        raise Exception(f"{dups} is duplicated ({len(dups)} cards)")
 def check_for_removed():
     cards_found = ['Ace_Spades', '2_Spades', '3_Spades', '4_Spades', '5_Spades', '6_Spades', '7_Spades', '8_Spades', '9_Spades', '10_Spades', 'Ace_Hearts', 'Jack_Spades', 'Queen_Spades', 'King_Spades', '2_Hearts', '3_Hearts', '4_Hearts', '5_Hearts', '6_Hearts', '7_Hearts', '8_Hearts', '9_Hearts', '10_Hearts', 'Jack_Hearts', 'Queen_Hearts', 'King_Hearts', '2_Diamonds', '3_Diamonds', '4_Diamonds', '5_Diamonds', '6_Diamonds', '7_Diamonds', '8_Diamonds', '9_Diamonds', '10_Diamonds', 'Jack_Diamonds', 'Queen_Diamonds', 'King_Diamonds', 'Ace_Diamonds', '2_Clubs', '3_Clubs', '4_Clubs', '5_Clubs', '6_Clubs', '7_Clubs', '8_Clubs', '9_Clubs', '10_Clubs', 'Jack_Clubs', 'Queen_Clubs', 'King_Clubs', 'Ace_Clubs']
     print("Checking for removed cards...")
@@ -335,18 +358,19 @@ player_data["draw"] = {}
 player_data["war"] = {}
 score_data["total"] = {}
 score_data["score"] = {}
+score_data["wins"] = {}
 for i in range(num_players):
     player_data["collect"]["p" + str(i + 1)] = []
     player_data["draw"]["p" + str(i + 1)] = []
     player_data["war"]["p" + str(i + 1)] = []
     score_data["total"]["p" + str(i + 1)] = []
     score_data["score"]["p" + str(i + 1)] = 0
-    players.append("p" + str(i + 1))
-    og_players.append("p" + str(i + 1))               
-desired_time = input("Please enter how many minutes per game you'd like (enter 'random' to pick randomly each game) ")
-#while not (desired_time == "5" or desired_time == "6" or desired_time == "7" or desired_time == "8" or desired_time == "9" or desired_time == "10" or desired_time.lower() == "random"):
-    #desired_time = input("Please enter a valid input ")
-if desired_time.lower() != "random":
+    score_data["wins"]["p" + str(i + 1)] = 0
+    og_players.append("p" + str(i + 1))              
+desired_time = input("Please enter how many minutes per game you'd like (enter 'r' to pick randomly each game) ")
+while not (desired_time == "5" or desired_time == "6" or desired_time == "7" or desired_time == "8" or desired_time == "9" or desired_time == "10" or desired_time.lower() == "r"):
+    desired_time = input("Please enter a valid input ")
+if desired_time.lower() != "r":
     desired_time = int(desired_time) * 60
 printing_on = input("Would you like to turn on print statements? (They will cause significant slowdown with large numbers of games) (Y/N) ")
 while not (printing_on.lower() == "y" or printing_on.lower() == "n"):
@@ -359,16 +383,21 @@ start_time = time.time()
 for i in range(desired_games):
     extras = True
     print("its the start of the for loop, and first round has been set to true")
-    if str(desired_time).lower() == "random":
+    if str(desired_time).lower() == "r":
         desired_time = random.randrange(5, 10) * 60
     timer = desired_time
     game_number = i + 1
+    players.clear()
+    for i in range(num_players):
+        players.append("p" + str(i + 1))
+    print(og_players)
     p1_collect = []
     p2_collect = []
     p1_draw = []
     p2_draw = []
     p1_war = []
     p2_war = []
+    deck = ['Ace_Spades', '2_Spades', '3_Spades', '4_Spades', '5_Spades', '6_Spades', '7_Spades', '8_Spades', '9_Spades', '10_Spades', 'Ace_Hearts', 'Jack_Spades', 'Queen_Spades', 'King_Spades', '2_Hearts', '3_Hearts', '4_Hearts', '5_Hearts', '6_Hearts', '7_Hearts', '8_Hearts', '9_Hearts', '10_Hearts', 'Jack_Hearts', 'Queen_Hearts', 'King_Hearts', '2_Diamonds', '3_Diamonds', '4_Diamonds', '5_Diamonds', '6_Diamonds', '7_Diamonds', '8_Diamonds', '9_Diamonds', '10_Diamonds', 'Jack_Diamonds', 'Queen_Diamonds', 'King_Diamonds', 'Ace_Diamonds', '2_Clubs', '3_Clubs', '4_Clubs', '5_Clubs', '6_Clubs', '7_Clubs', '8_Clubs', '9_Clubs', '10_Clubs', 'Jack_Clubs', 'Queen_Clubs', 'King_Clubs', 'Ace_Clubs']
     if printing_on == True:
         print("Shuffling deck...")
     if force_war == False:
@@ -411,6 +440,7 @@ for i in range(desired_games):
                 print("its the first round of the game")
                 player_data["collect"][compare[0].split("_")[2]].extend(extra_cards)
                 extras = False
+                extra_cards.clear()
                 print("first round has been set to false")
             for i in players:
                 player_data["draw"][i].pop(0)
@@ -424,6 +454,9 @@ for i in range(desired_games):
         scoring()
     if len(players) == 1:
         print(f"{players[0]} wins with 96 points")
+    for x, d in player_data.items():
+            for i in d.values():
+                i.clear()
     """
     while not ((len(p1_draw) == 0 and len(p1_collect) == 0) or (len(p2_draw) == 0 and len(p2_collect) == 0) or
     timer <= 0 or war == "insufficient_cards_for_war"):
@@ -479,22 +512,24 @@ for i in range(desired_games):
             print("\033[1A", end = "\x1b[2K")
         else:
             print(f"{i + 1} of {desired_games} games simulated", end = "\n")
+    """
 print("-----------------------")
 print(f"Simulation runtime: {str(datetime.timedelta(seconds = time.time() - start_time))}")
-print(f"Shortest game: {str(datetime.timedelta(seconds = shortest))}")
-print(f"Player 1 wins: {'{:,}'.format(p1_wins)} ({round((p1_wins/desired_games) * 100, 5)}%)") 
-print(f"Player 2 wins: {'{:,}'.format(p2_wins)} ({round((p2_wins/desired_games) * 100, 5)}%)") 
+#print(f"Shortest game: {str(datetime.timedelta(seconds = shortest))}")
+for i in og_players:
+    print(f"Player {i[1]} wins: {'{:,}'.format(score_data["wins"][i])} ({round((score_data["wins"][i]/desired_games) * 100, 5)}%)")    
+#print(f"Player 1 wins: {'{:,}'.format(p1_wins)} ({round((p1_wins/desired_games) * 100, 5)}%)") 
+#print(f"Player 2 wins: {'{:,}'.format(p2_wins)} ({round((p2_wins/desired_games) * 100, 5)}%)") 
 print(f"Ties: {'{:,}'.format(ties)} ({round((ties/desired_games) * 100, 5)}%)")
-print(f"96 to 0 games: {'{:,}'.format(ninety_six)} ({round((ninety_six/desired_games) * 100, 5)}%)")
-print(f"Games that ended early: {'{:,}'.format(ended_early)} ({round((ended_early/desired_games) * 100, 5)}%)")
-if four_aces != 0:
-    print(f"Games where someone has 4 aces: {'{:,}'.format(four_aces)} ({round((four_aces/desired_games) * 100, 5)}%) (wins in this situation: {'{:,}'.format(four_aces_win)} [{round((four_aces_win/four_aces)* 100, 5)}%])")
-else:
-    print("Games where someone has 4 aces: 0")
-if wars[0] != 0:
-    print(f"Single wars: {'{:,}'.format(wars[0])}")
-for i in wars[1:]:
-    print(f"{war_names[wars.index(i)]} wars: {'{:,}'.format(wars[wars.index(i)])} - games to occur: {'{:,}'.format(war_first_occurence[wars.index(i) - 1])}")
-print(f"Double wars with 4 aces: {'{:,}'.format(ace_war_count)} - games to occur: {'{:,}'.format(ace_war)}")
-print(f"Double wars with 4 twos: {'{:,}'.format(two_war_count)} - games to occur: {'{:,}'.format(two_war)}")
-"""
+#print(f"96 to 0 games: {'{:,}'.format(ninety_six)} ({round((ninety_six/desired_games) * 100, 5)}%)")
+#print(f"Games that ended early: {'{:,}'.format(ended_early)} ({round((ended_early/desired_games) * 100, 5)}%)")
+#if four_aces != 0:
+    #print(f"Games where someone has 4 aces: {'{:,}'.format(four_aces)} ({round((four_aces/desired_games) * 100, 5)}%) (wins in this situation: {'{:,}'.format(four_aces_win)} [{round((four_aces_win/four_aces)* 100, 5)}%])")
+#else:
+    #print("Games where someone has 4 aces: 0")
+#if wars[0] != 0:
+    #print(f"Single wars: {'{:,}'.format(wars[0])}")
+#for i in wars[1:]:
+    #print(f"{war_names[wars.index(i)]} wars: {'{:,}'.format(wars[wars.index(i)])} - games to occur: {'{:,}'.format(war_first_occurence[wars.index(i) - 1])}")
+#print(f"Double wars with 4 aces: {'{:,}'.format(ace_war_count)} - games to occur: {'{:,}'.format(ace_war)}")
+#print(f"Double wars with 4 twos: {'{:,}'.format(two_war_count)} - games to occur: {'{:,}'.format(two_war)}")
