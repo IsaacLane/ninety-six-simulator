@@ -33,7 +33,7 @@ scores = []
 scores_players = []
 force_war = False
 hierarchy = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"]
-war_names = ["Single", "Double", "Triple", "Quadruple", "Quintuple", "Sextuple", "Septuple"]
+war_names = ["SINGLE", "DOUBLE", "TRIPLE", "QUADRUPLE", "QUINTUPLE", "SEXTUPLE", "SEPTUPLE"]
 def deal():
     global extra_cards
     for i in player_data["draw"].values():
@@ -41,8 +41,6 @@ def deal():
         del deck[0:math.floor(52/num_players)]
     check_for_dups()
     extra_cards = deck
-    print("Leftover cards:")
-    print(extra_cards)
     #for i in range(26):
         #p1_draw.append(deck[i])
     #for i in range(26, 52):
@@ -52,18 +50,18 @@ def deal():
 def check_empty_piles():
     global out_of_game
     out_of_game = False
-    print("Checking for empty piles")
     for i in players[:]:
         if len(player_data["draw"][i]) == 0:
             if len(player_data["collect"][i]) == 0:
-                print(f"{i} is out of game")
+                if printing_on == True:
+                    print(f"Player {i[1]} ran out of cards!")
                 players.remove(i)
-                print(players)
                 if i in war_players:
                     war_players.remove(i)
                 out_of_game = True
                 continue
-            print(f"replenishing {i} draw pile")
+            if printing_on == True:
+                print(f"Player {i[1]}'s draw pile being reshuffled...")
             random.shuffle(player_data["collect"][i])
             player_data["draw"][i].extend(player_data["collect"][i])
             player_data["collect"][i].clear()
@@ -93,41 +91,34 @@ def war():
             else:
                 break
     timer -= war_time       
-    print("Player data after war cards distributed")
-    print(player_data)
     for i in war_players[:]:
-        print(i)
         check_empty_piles()
         if i in war_players:
             compare.append(player_data["draw"][i][0] + "_" + i)
-    print(player_data["war"])
     if len(war_players) == 0:
-        print("no players left in war")
+        if printing_on == True:
+            print("All players in war ran out of cards!")
         for i in player_data["war"].values():
             extra_cards.extend(i)
             i.clear()
         extras = True
         return
-    print(player_data["war"])
     compare.sort(reverse=True, key=sort)
-    print("Cards being compared (within war)")
-    print(compare)
     timer -= play_time
     if len(compare) != 1:
-        print("Checkpoint 1")
         if hierarchy.index((compare[card]).split("_")[0]) == hierarchy.index((compare[card + 1]).split("_")[0]):
-            print("Checkpoint 2")
             card += 1
             same_top_card()
             war_players = list(set(war_players))
             war_num += 1
-            print(f"{war_num} WAR")
+            if printing_on == True:
+                print(f"{war_names[war_num - 1]} WAR")
             war()
         else:
-            print("Checkpoint 3")
             no_war()
     else:
-        print("Only one remaining player in war")
+        if printing_on == True:
+            print("Only one remaining player in war")
         no_war()
     """
     try:
@@ -184,24 +175,16 @@ def war():
     """
 def no_war():
     global war_num, extras, timer
-    print("no war")
-    print(player_data["war"])
     war_num = 1
+    if printing_on == True:
+        print(f"Player {compare[0][-1]}'s {compare[0].split("_")[0]} of {compare[0].split("_")[1]} is victorious")
     player_data["collect"][compare[0].split("_")[2]].extend(player_data["draw"][i][0] for i in war_players)
     if extras == True:
-        print("its the first round of the game... and its a waaar")
         player_data["collect"][compare[0].split("_")[2]].extend(extra_cards)
         extras = False
         extra_cards.clear()
-        print("first round has been set to false")
-    print(player_data["war"])
-    print("Distributing war cards")
-    print(og_players)
     for i in og_players:
-        print(i)
-        print(player_data["war"][i])
         player_data["collect"][compare[0].split("_")[2]].extend(player_data["war"][i])
-    print(player_data)
     for i in war_players:
         player_data["draw"][i].pop(0)
     timer -= gather_time
@@ -209,8 +192,6 @@ def no_war():
     war_players.clear()
     for i in player_data["war"].values():
         i.clear()
-    print("Player data after war ends")
-    print(player_data)
 def scoring():
     global ties
     for i in og_players:
@@ -230,12 +211,13 @@ def scoring():
     scores = list(score_data["score"].values())
     scores_players = list(score_data["score"].keys())
     if scores[0] == scores[1]:
+        if printing_on == True:
+            print("One or more players tied!")
         ties += 1
     else:
+        if printing_on == True:
+            print(f"Player {scores_players[0][1]} wins with {scores[0]} points")
         score_data["wins"][scores_players[0]] += 1
-    print(score_data["score"])
-    print(scores)
-    print(player_data)
     """
     p1_score = 0
     p2_score = 0
@@ -293,8 +275,6 @@ def sort(e):
     return hierarchy.index(e.split("_")[0])
 def same_top_card():
     global card
-    print(card + 1)
-    print(compare)
     if not card + 2 > len(compare):
         if hierarchy.index((compare[card]).split("_")[0]) == hierarchy.index((compare[card + 1]).split("_")[0]):
             war_players.append(compare[card].split("_")[2])
@@ -304,7 +284,6 @@ def same_top_card():
 def check_for_dups():
     seen = set()
     dups = set()
-    print("Checking for duplicate cards...")
     for x, d in player_data.items():
         for y, l in d.items():
             for i in l:
@@ -316,7 +295,6 @@ def check_for_dups():
         raise Exception(f"{dups} is duplicated ({len(dups)} cards)")
 def check_for_removed():
     cards_found = ['Ace_Spades', '2_Spades', '3_Spades', '4_Spades', '5_Spades', '6_Spades', '7_Spades', '8_Spades', '9_Spades', '10_Spades', 'Ace_Hearts', 'Jack_Spades', 'Queen_Spades', 'King_Spades', '2_Hearts', '3_Hearts', '4_Hearts', '5_Hearts', '6_Hearts', '7_Hearts', '8_Hearts', '9_Hearts', '10_Hearts', 'Jack_Hearts', 'Queen_Hearts', 'King_Hearts', '2_Diamonds', '3_Diamonds', '4_Diamonds', '5_Diamonds', '6_Diamonds', '7_Diamonds', '8_Diamonds', '9_Diamonds', '10_Diamonds', 'Jack_Diamonds', 'Queen_Diamonds', 'King_Diamonds', 'Ace_Diamonds', '2_Clubs', '3_Clubs', '4_Clubs', '5_Clubs', '6_Clubs', '7_Clubs', '8_Clubs', '9_Clubs', '10_Clubs', 'Jack_Clubs', 'Queen_Clubs', 'King_Clubs', 'Ace_Clubs']
-    print("Checking for removed cards...")
     for x, d in player_data.items():
         for y, l in d.items():
             for i in l:
@@ -380,17 +358,15 @@ if printing_on.lower() == "y":
 else:
     printing_on = False
 start_time = time.time()
-for i in range(desired_games):
+for z in range(desired_games):
     extras = True
-    print("its the start of the for loop, and first round has been set to true")
     if str(desired_time).lower() == "r":
         desired_time = random.randrange(5, 10) * 60
     timer = desired_time
-    game_number = i + 1
+    game_number = z + 1
     players.clear()
     for i in range(num_players):
         players.append("p" + str(i + 1))
-    print(og_players)
     p1_collect = []
     p2_collect = []
     p1_draw = []
@@ -405,22 +381,15 @@ for i in range(desired_games):
     timer -= shuffle_time
     if printing_on == True:
         print("Dealing cards...")
-    print(len(deck))
     deal()
     if printing_on == True:
         print(f"Starting game number {game_number}")
     while not (len(players) == 1 or timer <= 0):
-        print(len(players))
         check_for_dups()
         check_for_removed()
-        print("Original player data")
-        print(player_data)
         for i in players:
-            print(i)
             compare.append(player_data["draw"][i][0] + "_" + i)
         compare.sort(reverse=True, key=sort)
-        print("Cards being compared")
-        print(compare)
         timer -= play_time
         if hierarchy.index((compare[card]).split("_")[0]) == hierarchy.index((compare[card + 1]).split("_")[0]):
             war_players.append(compare[card].split("_")[2])
@@ -428,32 +397,36 @@ for i in range(desired_games):
             card += 1
             same_top_card()
             war_players = list(set(war_players))
-            print("war")
-            print("war players")
-            print(war_players)
+            if printing_on == True:
+                print("WAR")
             war()
         else:
-            print("no war")
-            print(extras)
+            if printing_on == True:
+                print(f"Player {compare[0][-1]}'s {compare[0].split("_")[0]} of {compare[0].split("_")[1]} is victorious")
             player_data["collect"][compare[0].split("_")[2]].extend(i.rpartition("_")[0] for i in compare)
             if extras == True:
-                print("its the first round of the game")
                 player_data["collect"][compare[0].split("_")[2]].extend(extra_cards)
                 extras = False
                 extra_cards.clear()
-                print("first round has been set to false")
             for i in players:
                 player_data["draw"][i].pop(0)
             timer -= gather_time
             compare.clear()
-            print("Player data")
-            print(player_data)
         check_empty_piles()
     if timer <= 0:
-        print("Time's up!")
+        if printing_on == True:
+            print("Time's up!")
+            print("Calculating scores...")
         scoring()
     if len(players) == 1:
-        print(f"{players[0]} wins with 96 points")
+        if printing_on == True:
+            print(f"Player {players[0][1]} wins with 96 points")
+    if printing_on == False:
+        if z != desired_games - 1:
+            print(f"{z + 1} of {desired_games} games simulated")
+            print("\033[1A", end = "\x1b[2K")
+        else:
+            print(f"{z + 1} of {desired_games} games simulated", end = "\n")
     for x, d in player_data.items():
             for i in d.values():
                 i.clear()
