@@ -24,6 +24,12 @@ player_data = {}
 score_data = {}
 war_first_occurence = []
 wars = []
+two_way_wars = []
+three_way_wars = []
+four_way_wars = []
+two_way_wars_time = []
+three_way_wars_time = []
+four_way_wars_time = []
 compare = []
 war_players = []
 extra_cards = []
@@ -33,7 +39,7 @@ scores = []
 scores_players = []
 force_war = False
 hierarchy = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"]
-war_names = ["SINGLE", "DOUBLE", "TRIPLE", "QUADRUPLE", "QUINTUPLE", "SEXTUPLE", "SEPTUPLE"]
+war_names = ["single", "double", "triple", "quadruple", "quintuple", "sextuple", "septuple"]
 def deal():
     global extra_cards
     for i in player_data["draw"].values():
@@ -65,20 +71,6 @@ def check_empty_piles():
             random.shuffle(player_data["collect"][i])
             player_data["draw"][i].extend(player_data["collect"][i])
             player_data["collect"][i].clear()
-    """
-    if len(p1_draw) == 0:
-        if printing_on == True:
-            print("Player 1's draw pile being reshuffled...")
-        random.shuffle(p1_collect)
-        p1_draw.extend(p1_collect)
-        p1_collect.clear()
-    if len(p2_draw) == 0:
-        if printing_on == True:
-            print("Player 2's draw pile being reshuffled...")
-        random.shuffle(p2_collect)
-        p2_draw.extend(p2_collect)
-        p2_collect.clear()
-    """
 def war():
     global timer, war_num, ace_war, ace_war_count, two_war, two_war_count, war_players, card, extras, extra_cards
     card = 0
@@ -112,7 +104,7 @@ def war():
             war_players = list(set(war_players))
             war_num += 1
             if printing_on == True:
-                print(f"{war_names[war_num - 1]} WAR")
+                print(f"{war_names[war_num - 1].upper()} WAR")
             war()
         else:
             no_war()
@@ -120,61 +112,26 @@ def war():
         if printing_on == True:
             print("Only one remaining player in war")
         no_war()
-    """
-    try:
-        for i in range(4):
-            p1_war.append(p1_draw[0])
-            p2_war.append(p2_draw[0])
-            p1_draw.pop(0)
-            p2_draw.pop(0)
-            check_empty_piles()
-        if "Ace" in p1_war[0] and "Ace" in p1_draw[0] and "Ace" in p2_war[0] and "Ace" in p2_draw[0]:
-            if not ace_war:
-                ace_war = game_number
-            ace_war_count += 1
-        elif "2" in p1_war[0] and "2" in p1_draw[0] and "2" in p2_war[0] and "2" in p2_draw[0]:
-            if not two_war:
-                two_war = game_number
-            two_war_count += 1
-        if hierarchy.index((p1_draw[0]).split("_")[0]) > hierarchy.index((p2_draw[0]).split("_")[0]):
-            if printing_on == True:
-                print(f"Player 1's {(p1_draw[0]).split("_")[0]} of {(p1_draw[0]).split("_")[1]} beats Player 2's {(p2_draw[0]).split("_")[0]} of {(p2_draw[0]).split("_")[1]}")
-            p1_collect.extend([p1_draw[0], p2_draw[0]])
-            p1_collect.extend(p1_war)
-            p1_collect.extend(p2_war)
-            p1_draw.pop(0)
-            p2_draw.pop(0)
-            p1_war.clear()
-            p2_war.clear()
-            war_num = 0
-        elif hierarchy.index((p1_draw[0]).split("_")[0]) < hierarchy.index((p2_draw[0]).split("_")[0]):
-            if printing_on == True:
-                print(f"Player 2's {(p2_draw[0]).split("_")[0]} of {(p2_draw[0]).split("_")[1]} beats Player 1's {(p1_draw[0]).split("_")[0]} of {(p1_draw[0]).split("_")[1]}")
-            p2_collect.extend([p1_draw[0], p2_draw[0]])
-            p2_collect.extend(p1_war)
-            p2_collect.extend(p2_war)
-            p1_draw.pop(0)
-            p2_draw.pop(0)
-            p1_war.clear()
-            p2_war.clear()
-            war_num = 0
-        else:
-            war_num += 1
-            if war_num == len(wars):
-                wars.append(0)
-            wars[war_num] += 1
-            if war_num - 1 == len(war_first_occurence):
-                war_first_occurence.append(game_number)
-            if printing_on == True:
-                print(war_names[war_num] + " War!!")
-            war()
-    except IndexError:
-        if printing_on == True:
-            print("Game ends due to insufficient cards for War")
-        return "insufficient_cards_for_war"
-    """
 def no_war():
     global war_num, extras, timer
+    if len(war_players) == 2:
+        while war_num > len(two_way_wars): 
+            two_way_wars.append(0)
+        two_way_wars[war_num - 1] += 1
+        while war_num > len(two_way_wars_time):
+            two_way_wars_time.append(game_number)
+    elif len(war_players) == 3:
+        while war_num > len(three_way_wars):
+            three_way_wars.append(0)
+        three_way_wars[war_num - 1] += 1
+        while war_num > len(three_way_wars_time):
+            three_way_wars_time.append(game_number)
+    elif len(war_players) == 4:
+        while war_num > len(four_way_wars):
+            four_way_wars.append(0)
+        four_way_wars[war_num - 1] += 1
+        while war_num > len(four_way_wars_time):
+            four_way_wars_time.append(game_number)
     war_num = 1
     if printing_on == True:
         print(f"Player {compare[0][-1]}'s {compare[0].split("_")[0]} of {compare[0].split("_")[1]} is victorious")
@@ -218,59 +175,6 @@ def scoring():
         if printing_on == True:
             print(f"Player {scores_players[0][1]} wins with {scores[0]} points")
         score_data["wins"][scores_players[0]] += 1
-    """
-    p1_score = 0
-    p2_score = 0
-    p1_aces = 0
-    p2_aces = 0
-    p1_total = p1_draw + p1_collect + p1_war
-    p2_total = p2_draw + p2_collect + p2_war
-    p1_score = len(p1_total)
-    p2_score = len(p2_total)
-    global p1_wins, p2_wins, ties, four_aces, four_aces_win
-    for i in p1_total:
-        if "Jack" in i:
-            p1_score += 1
-        elif "Queen" in i:
-            p1_score += 2
-        elif "King" in i:
-            p1_score += 3
-        elif "Ace" in i:
-            p1_score += 5
-            p1_aces += 1
-    if p1_aces == 4:
-        four_aces += 1
-    for i in p2_total:
-        if "Jack" in i:
-            p2_score += 1
-        elif "Queen" in i:
-            p2_score += 2
-        elif "King" in i:
-            p2_score += 3
-        elif "Ace" in i:
-            p2_score += 5
-            p2_aces += 1
-    if p2_aces == 4:
-        four_aces += 1
-    if p1_score == 96 or p2_score == 96:
-        ninety_six += 1
-    if p1_score > p2_score:
-        if printing_on == True:
-            print(f"Player 1 wins, {p1_score} to {p2_score}")
-        p1_wins += 1
-        if p1_aces == 4:
-            four_aces_win += 1
-    elif p1_score < p2_score:
-        if printing_on == True:
-            print(f"Player 2 wins, {p2_score} to {p1_score}")
-        p2_wins += 1
-        if p2_aces == 4:
-            four_aces_win += 1
-    elif p1_score == p2_score:
-        if printing_on == True:
-            print("It's a tie - 48 to 48 :O")
-        ties += 1
-    """
 def sort(e):
     return hierarchy.index(e.split("_")[0])
 def same_top_card():
@@ -421,6 +325,8 @@ for z in range(desired_games):
     if len(players) == 1:
         if printing_on == True:
             print(f"Player {players[0][1]} wins with 96 points")
+        score_data["wins"][players[0]] += 1
+        ninety_six += 1
     if printing_on == False:
         if z != desired_games - 1:
             print(f"{z + 1} of {desired_games} games simulated")
@@ -430,76 +336,26 @@ for z in range(desired_games):
     for x, d in player_data.items():
             for i in d.values():
                 i.clear()
-    """
-    while not ((len(p1_draw) == 0 and len(p1_collect) == 0) or (len(p2_draw) == 0 and len(p2_collect) == 0) or
-    timer <= 0 or war == "insufficient_cards_for_war"):
-        check_empty_piles()        
-        if hierarchy.index((p1_draw[0]).split("_")[0]) > hierarchy.index((p2_draw[0]).split("_")[0]):
-            if printing_on == True:
-                print(f"Player 1's {(p1_draw[0]).split("_")[0]} of {(p1_draw[0]).split("_")[1]} beats Player 2's {(p2_draw[0]).split("_")[0]} of {(p2_draw[0]).split("_")[1]}")
-            p1_collect.extend([p1_draw[0], p2_draw[0]])
-            p2_draw.pop(0)
-            p1_draw.pop(0)
-        elif hierarchy.index((p1_draw[0]).split("_")[0]) < hierarchy.index((p2_draw[0]).split("_")[0]):
-            if printing_on == True:
-                print(f"Player 2's {(p2_draw[0]).split("_")[0]} of {(p2_draw[0]).split("_")[1]} beats Player 1's {(p1_draw[0]).split("_")[0]} of {(p1_draw[0]).split("_")[1]}")
-            p2_collect.extend([p1_draw[0], p2_draw[0]])
-            p1_draw.pop(0)
-            p2_draw.pop(0)
-        else:
-            if printing_on == True:
-                print(f"Player 1 plays {(p1_draw[0]).split("_")[0]} of {(p1_draw[0]).split("_")[1]} and Player 2 plays {(p2_draw[0]).split("_")[0]} of {(p2_draw[0]).split("_")[1]}")
-                print("War!!")
-            if not wars:
-                wars.append(0)
-            wars[0] += 1
-            war()
-    if timer < 0:
-        timer = 0
-    if timer == 0:
-       if printing_on == True: 
-           print("Time is up!")
-    else:
-        ended_early += 1
-    if desired_time - timer < shortest:
-        shortest = desired_time - timer 
-    if len(p1_draw) == 0 and len(p1_collect) == 0:
-        if printing_on == True:
-            print("Player 1 ran out of cards!")
-            print("Player 2 wins, 96 to 0")
-        p2_wins += 1
-        ninety_six += 1
-    elif len(p2_draw) == 0 and len(p2_collect) == 0:
-        if printing_on == True:    
-            print("Player 2 ran out of cards!")
-            print("Player 1 wins, 96 to 0")
-        p1_wins += 1
-        ninety_six += 1
-    else:
-        if printing_on == True:
-            print("Calculating scores...")
-        scoring()
-    if printing_on == False:
-        if i != desired_games - 1:
-            print(f"{i + 1} of {desired_games} games simulated")
-            print("\033[1A", end = "\x1b[2K")
-        else:
-            print(f"{i + 1} of {desired_games} games simulated", end = "\n")
-    """
 print("-----------------------")
 print(f"Simulation runtime: {str(datetime.timedelta(seconds = time.time() - start_time))}")
 #print(f"Shortest game: {str(datetime.timedelta(seconds = shortest))}")
 for i in og_players:
-    print(f"Player {i[1]} wins: {'{:,}'.format(score_data["wins"][i])} ({round((score_data["wins"][i]/desired_games) * 100, 5)}%)")    
-#print(f"Player 1 wins: {'{:,}'.format(p1_wins)} ({round((p1_wins/desired_games) * 100, 5)}%)") 
-#print(f"Player 2 wins: {'{:,}'.format(p2_wins)} ({round((p2_wins/desired_games) * 100, 5)}%)") 
+    print(f"Player {i[1]} wins: {'{:,}'.format(score_data["wins"][i])} ({round((score_data["wins"][i]/desired_games) * 100, 5)}%)")
 print(f"Ties: {'{:,}'.format(ties)} ({round((ties/desired_games) * 100, 5)}%)")
-#print(f"96 to 0 games: {'{:,}'.format(ninety_six)} ({round((ninety_six/desired_games) * 100, 5)}%)")
+print(f"96 to 0 games: {'{:,}'.format(ninety_six)} ({round((ninety_six/desired_games) * 100, 5)}%)")
 #print(f"Games that ended early: {'{:,}'.format(ended_early)} ({round((ended_early/desired_games) * 100, 5)}%)")
 #if four_aces != 0:
     #print(f"Games where someone has 4 aces: {'{:,}'.format(four_aces)} ({round((four_aces/desired_games) * 100, 5)}%) (wins in this situation: {'{:,}'.format(four_aces_win)} [{round((four_aces_win/four_aces)* 100, 5)}%])")
 #else:
     #print("Games where someone has 4 aces: 0")
+if len(two_way_wars) != 0:
+    print(f"Two-way single wars: {'{:,}'.format(two_way_wars[0])}")
+for i in two_way_wars[1:]:
+    print(f"Two-way {war_names[two_way_wars.index(i)]} wars: {'{:,}'.format(i)} - games to occur: {'{:,}'.format(two_way_wars_time[two_way_wars.index(i)])}")
+for i in three_way_wars:
+    print(f"Three-way {war_names[three_way_wars.index(i)]} wars: {'{:,}'.format(i)} - games to occur: {'{:,}'.format(three_way_wars_time[three_way_wars.index(i)])}")
+for i in four_way_wars:
+    print(f"Four-way {war_names[four_way_wars.index(i)]} wars: {'{:,}'.format(i)} - games to occur: {'{:,}'.format(four_way_wars_time[four_way_wars.index(i)])}")
 #if wars[0] != 0:
     #print(f"Single wars: {'{:,}'.format(wars[0])}")
 #for i in wars[1:]:
