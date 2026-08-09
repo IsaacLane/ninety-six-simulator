@@ -60,14 +60,14 @@ def check_empty_piles():
         if len(player_data["draw"][i]) == 0:
             if len(player_data["collect"][i]) == 0:
                 if printing_on == True:
-                    print(f"Player {i[1]} ran out of cards!")
+                    print(f"Player {i[1:]} ran out of cards!")
                 players.remove(i)
                 if i in war_players:
                     war_players.remove(i)
                 out_of_game = True
                 continue
             if printing_on == True:
-                print(f"Player {i[1]}'s draw pile being reshuffled...")
+                print(f"Player {i[1:]}'s draw pile being reshuffled...")
             random.shuffle(player_data["collect"][i])
             player_data["draw"][i].extend(player_data["collect"][i])
             player_data["collect"][i].clear()
@@ -134,7 +134,7 @@ def no_war():
             four_way_wars_time.append(game_number)
     war_num = 1
     if printing_on == True:
-        print(f"Player {compare[0][-1]}'s {compare[0].split("_")[0]} of {compare[0].split("_")[1]} is victorious")
+        print(f"Player {compare[0].rpartition("_")[2][1:]}'s {compare[0].split("_")[0]} of {compare[0].split("_")[1]} is victorious")
     player_data["collect"][compare[0].split("_")[2]].extend(player_data["draw"][i][0] for i in war_players)
     if extras == True:
         player_data["collect"][compare[0].split("_")[2]].extend(extra_cards)
@@ -173,7 +173,7 @@ def scoring():
         ties += 1
     else:
         if printing_on == True:
-            print(f"Player {scores_players[0][1]} wins with {scores[0]} points")
+            print(f"Player {scores_players[0][1:]} wins with {scores[0]} points")
         score_data["wins"][scores_players[0]] += 1
 def sort(e):
     return hierarchy.index(e.split("_")[0])
@@ -306,7 +306,7 @@ for z in range(desired_games):
             war()
         else:
             if printing_on == True:
-                print(f"Player {compare[0][-1]}'s {compare[0].split("_")[0]} of {compare[0].split("_")[1]} is victorious")
+                print(f"Player {compare[0].rpartition("_")[2][1:]}'s {compare[0].split("_")[0]} of {compare[0].split("_")[1]} is victorious")
             player_data["collect"][compare[0].split("_")[2]].extend(i.rpartition("_")[0] for i in compare)
             if extras == True:
                 player_data["collect"][compare[0].split("_")[2]].extend(extra_cards)
@@ -324,7 +324,7 @@ for z in range(desired_games):
         scoring()
     if len(players) == 1:
         if printing_on == True:
-            print(f"Player {players[0][1]} wins with 96 points")
+            print(f"Player {players[0][1:]} wins with 96 points")
         score_data["wins"][players[0]] += 1
         ninety_six += 1
     if printing_on == False:
@@ -340,7 +340,7 @@ print("-----------------------")
 print(f"Simulation runtime: {str(datetime.timedelta(seconds = time.time() - start_time))}")
 #print(f"Shortest game: {str(datetime.timedelta(seconds = shortest))}")
 for i in og_players:
-    print(f"Player {i[1]} wins: {'{:,}'.format(score_data["wins"][i])} ({round((score_data["wins"][i]/desired_games) * 100, 5)}%)")
+    print(f"Player {i[1:]} wins: {'{:,}'.format(score_data["wins"][i])} ({round((score_data["wins"][i]/desired_games) * 100, 5)}%)")
 print(f"Ties: {'{:,}'.format(ties)} ({round((ties/desired_games) * 100, 5)}%)")
 print(f"96 to 0 games: {'{:,}'.format(ninety_six)} ({round((ninety_six/desired_games) * 100, 5)}%)")
 #print(f"Games that ended early: {'{:,}'.format(ended_early)} ({round((ended_early/desired_games) * 100, 5)}%)")
