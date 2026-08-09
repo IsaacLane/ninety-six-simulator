@@ -6,37 +6,10 @@ war_time = 3
 gather_time = 2
 points_time = 60
 war_num = 1
-p1_wins = 0
-p2_wins = 0
-ties = 0
-ninety_six = 0
+wars, war_first_occurence, two_way_wars, three_way_wars, four_way_wars, two_way_wars_time, three_way_wars_time, four_way_wars_time, compare, war_players, extra_cards, players, og_players, scores, scores_players = []
+ties, ninety_six, four_aces, four_aces_win, ended_early, war_number_players, card = 0
+player_data, score_data = {}
 shortest = 600
-ace_war = int()
-ace_war_count = 0
-two_war = int()
-two_war_count = 0
-four_aces = 0
-four_aces_win = 0
-ended_early = 0
-war_number_players = 0
-card = 0
-player_data = {}
-score_data = {}
-war_first_occurence = []
-wars = []
-two_way_wars = []
-three_way_wars = []
-four_way_wars = []
-two_way_wars_time = []
-three_way_wars_time = []
-four_way_wars_time = []
-compare = []
-war_players = []
-extra_cards = []
-players = []
-og_players = []
-scores = []
-scores_players = []
 force_war = False
 hierarchy = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"]
 war_names = ["single", "double", "triple", "quadruple", "quintuple", "sextuple", "septuple"]
@@ -47,10 +20,6 @@ def deal():
         del deck[0:math.floor(52/num_players)]
     check_for_dups()
     extra_cards = deck
-    #for i in range(26):
-        #p1_draw.append(deck[i])
-    #for i in range(26, 52):
-        #p2_draw.append(deck[i])
     global timer
     timer -= deal_time
 def check_empty_piles():
@@ -150,10 +119,12 @@ def no_war():
     for i in player_data["war"].values():
         i.clear()
 def scoring():
-    global ties
+    global ties, four_aces, four_aces_win
+    four_aces_player = str()
     for i in og_players:
         score_data["total"][i] = player_data["collect"][i] + player_data["draw"][i] + player_data["war"][i]
         score_data["score"][i] = len(score_data["total"][i])
+        score_data["aces"][i] = 0
     for key, values in score_data["total"].items():
         for i in values:
             if "Jack" in i:
@@ -164,6 +135,10 @@ def scoring():
                 score_data["score"][key] += 3
             elif "Ace" in i:
                 score_data["score"][key] += 5
+                score_data["aces"][key] += 1
+        if score_data["aces"][key] == 4:
+            four_aces += 1
+            four_aces_player = key 
     score_data["score"] = dict(sorted(score_data["score"].items(), key=lambda x: x[1], reverse=True))
     scores = list(score_data["score"].values())
     scores_players = list(score_data["score"].keys())
@@ -174,6 +149,8 @@ def scoring():
     else:
         if printing_on == True:
             print(f"Player {scores_players[0][1:]} wins with {scores[0]} points")
+        if scores_players[0] == four_aces_player:
+            four_aces_win += 1
         score_data["wins"][scores_players[0]] += 1
 def sort(e):
     return hierarchy.index(e.split("_")[0])
@@ -241,6 +218,7 @@ player_data["war"] = {}
 score_data["total"] = {}
 score_data["score"] = {}
 score_data["wins"] = {}
+score_data["aces"] = {}
 for i in range(num_players):
     player_data["collect"]["p" + str(i + 1)] = []
     player_data["draw"]["p" + str(i + 1)] = []
@@ -248,6 +226,7 @@ for i in range(num_players):
     score_data["total"]["p" + str(i + 1)] = []
     score_data["score"]["p" + str(i + 1)] = 0
     score_data["wins"]["p" + str(i + 1)] = 0
+    score_data["aces"]["p" + str(i + 1)] = 0
     og_players.append("p" + str(i + 1))              
 desired_time = input("Please enter how many minutes per game you'd like (enter 'r' to pick randomly each game) ")
 while not (desired_time == "5" or desired_time == "6" or desired_time == "7" or desired_time == "8" or desired_time == "9" or desired_time == "10" or desired_time.lower() == "r"):
@@ -317,11 +296,17 @@ for z in range(desired_games):
             timer -= gather_time
             compare.clear()
         check_empty_piles()
-    if timer <= 0:
+    if timer < 0:
+        timer = 0
+    if timer == 0:
         if printing_on == True:
             print("Time's up!")
             print("Calculating scores...")
         scoring()
+    else:
+        ended_early += 1
+    if desired_time - timer < shortest:
+        shortest = desired_time - timer
     if len(players) == 1:
         if printing_on == True:
             print(f"Player {players[0][1:]} wins with 96 points")
@@ -338,16 +323,16 @@ for z in range(desired_games):
                 i.clear()
 print("-----------------------")
 print(f"Simulation runtime: {str(datetime.timedelta(seconds = time.time() - start_time))}")
-#print(f"Shortest game: {str(datetime.timedelta(seconds = shortest))}")
+print(f"Shortest game: {str(datetime.timedelta(seconds = shortest))}")
 for i in og_players:
     print(f"Player {i[1:]} wins: {'{:,}'.format(score_data["wins"][i])} ({round((score_data["wins"][i]/desired_games) * 100, 5)}%)")
 print(f"Ties: {'{:,}'.format(ties)} ({round((ties/desired_games) * 100, 5)}%)")
 print(f"96 to 0 games: {'{:,}'.format(ninety_six)} ({round((ninety_six/desired_games) * 100, 5)}%)")
-#print(f"Games that ended early: {'{:,}'.format(ended_early)} ({round((ended_early/desired_games) * 100, 5)}%)")
-#if four_aces != 0:
-    #print(f"Games where someone has 4 aces: {'{:,}'.format(four_aces)} ({round((four_aces/desired_games) * 100, 5)}%) (wins in this situation: {'{:,}'.format(four_aces_win)} [{round((four_aces_win/four_aces)* 100, 5)}%])")
-#else:
-    #print("Games where someone has 4 aces: 0")
+print(f"Games that ended early: {'{:,}'.format(ended_early)} ({round((ended_early/desired_games) * 100, 5)}%)")
+if four_aces != 0:
+    print(f"Games where someone has 4 aces: {'{:,}'.format(four_aces)} ({round((four_aces/desired_games) * 100, 5)}%) (wins in this situation: {'{:,}'.format(four_aces_win)} [{round((four_aces_win/four_aces)* 100, 5)}%])")
+else:
+    print("Games where someone has 4 aces: 0")
 if len(two_way_wars) != 0:
     print(f"Two-way single wars: {'{:,}'.format(two_way_wars[0])}")
 for i in two_way_wars[1:]:
@@ -356,9 +341,3 @@ for i in three_way_wars:
     print(f"Three-way {war_names[three_way_wars.index(i)]} wars: {'{:,}'.format(i)} - games to occur: {'{:,}'.format(three_way_wars_time[three_way_wars.index(i)])}")
 for i in four_way_wars:
     print(f"Four-way {war_names[four_way_wars.index(i)]} wars: {'{:,}'.format(i)} - games to occur: {'{:,}'.format(four_way_wars_time[four_way_wars.index(i)])}")
-#if wars[0] != 0:
-    #print(f"Single wars: {'{:,}'.format(wars[0])}")
-#for i in wars[1:]:
-    #print(f"{war_names[wars.index(i)]} wars: {'{:,}'.format(wars[wars.index(i)])} - games to occur: {'{:,}'.format(war_first_occurence[wars.index(i) - 1])}")
-#print(f"Double wars with 4 aces: {'{:,}'.format(ace_war_count)} - games to occur: {'{:,}'.format(ace_war)}")
-#print(f"Double wars with 4 twos: {'{:,}'.format(two_war_count)} - games to occur: {'{:,}'.format(two_war)}")
