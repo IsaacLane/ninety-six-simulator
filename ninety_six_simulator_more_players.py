@@ -25,21 +25,19 @@ scores_players = []
 player_data = {}
 score_data = {}
 shortest = 600
+game_number = 0
 force_war = False
 hierarchy = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"]
 war_names = ["single", "double", "triple", "quadruple", "quintuple", "sextuple", "septuple"]
 def deal():
-    global extra_cards
+    global extra_cards, timer
     for i in player_data["draw"].values():
         i.extend(deck[0:math.floor(52/num_players)])
         del deck[0:math.floor(52/num_players)]
     check_for_dups()
     extra_cards = deck
-    global timer
     timer -= deal_time
 def check_empty_piles():
-    global out_of_game
-    out_of_game = False
     for i in players[:]:
         if len(player_data["draw"][i]) == 0:
             if len(player_data["collect"][i]) == 0:
@@ -48,7 +46,6 @@ def check_empty_piles():
                 players.remove(i)
                 if i in war_players:
                     war_players.remove(i)
-                out_of_game = True
                 continue
             if printing_on == True:
                 print(f"Player {i[1:]}'s draw pile being reshuffled...")
@@ -134,7 +131,7 @@ def no_war():
     for i in player_data["war"].values():
         i.clear()
 def scoring():
-    global ties, four_aces, four_aces_win
+    global ties, four_aces, four_aces_win, minutes_games_remaining
     four_aces_player = str()
     for i in og_players:
         score_data["total"][i] = player_data["collect"][i] + player_data["draw"][i] + player_data["war"][i]
@@ -167,6 +164,8 @@ def scoring():
         if scores_players[0] == four_aces_player:
             four_aces_win += 1
         score_data["wins"][scores_players[0]] += 1
+    if mode == "2":
+        minutes_games_remaining -= points_time
 def sort(e):
     return hierarchy.index(e.split("_")[0])
 def same_top_card():
@@ -201,16 +200,22 @@ def check_for_removed():
             print(player_data)
             raise Exception(f"{cards_found} was deleted (or this thing is broken :P)")
 print("Welcome to the 96 Simulator!")
-desired_games = input("Please enter the number of games you'd like to simulate - up to 100,000 ")
+mode = input("Would you like to run a simulation based on number of games (Enter 1) or amount of time (Enter 2)? ")
+while not (mode == "1" or mode == "2"):
+    mode = input("Please enter a valid input ")
+if mode == "1":
+    desired_minutes_games = input("Please enter the number of games you'd like to simulate - up to 100,000 ")
+elif mode == "2":
+    desired_minutes_games = input("Please enter the number of minutes of gameplay you'd like to simulate - up to 10,000 ")
 while True:
     try:
-        desired_games = int(desired_games)
+        desired_minutes_games = int(desired_minutes_games)
     except ValueError:
-        desired_games = input("Please enter a valid input ")
+        desired_minutes_games = input("Please enter a valid input ")
         continue
     else:
-        if desired_games > 100000 or desired_games <= 0:
-            desired_games = input("Please enter a valid input ")
+        if desired_minutes_games > 100000 or desired_minutes_games <= 0:
+            desired_minutes_games = input("Please enter a valid input ")
             continue
         else:
             break
@@ -226,7 +231,19 @@ while True:
             num_players = input("Please enter a valid input ")
             continue
         else:
-            break
+            break           
+desired_time = input("Please enter how many minutes per game you'd like - between 5 and 10 inclusive (enter 'r' to pick randomly each game) ")
+while not (desired_time == "5" or desired_time == "6" or desired_time == "7" or desired_time == "8" or desired_time == "9" or desired_time == "10" or desired_time.lower() == "r"):
+    desired_time = input("Please enter a valid input ")
+if desired_time.lower() != "r":
+    desired_time = int(desired_time) * 60
+printing_on = input("Would you like to turn on print statements? (They will cause significant slowdown with large numbers of games) (Y/N) ")
+while not (printing_on.lower() == "y" or printing_on.lower() == "n"):
+    printing_on = input("Please enter a valid input ")
+if printing_on.lower() == "y":
+    printing_on = True
+else:
+    printing_on = False
 player_data["collect"] = {}
 player_data["draw"] = {}
 player_data["war"] = {}
@@ -242,26 +259,17 @@ for i in range(num_players):
     score_data["score"]["p" + str(i + 1)] = 0
     score_data["wins"]["p" + str(i + 1)] = 0
     score_data["aces"]["p" + str(i + 1)] = 0
-    og_players.append("p" + str(i + 1))              
-desired_time = input("Please enter how many minutes per game you'd like (enter 'r' to pick randomly each game) ")
-while not (desired_time == "5" or desired_time == "6" or desired_time == "7" or desired_time == "8" or desired_time == "9" or desired_time == "10" or desired_time.lower() == "r"):
-    desired_time = input("Please enter a valid input ")
-if desired_time.lower() != "r":
-    desired_time = int(desired_time) * 60
-printing_on = input("Would you like to turn on print statements? (They will cause significant slowdown with large numbers of games) (Y/N) ")
-while not (printing_on.lower() == "y" or printing_on.lower() == "n"):
-    printing_on = input("Please enter a valid input ")
-if printing_on.lower() == "y":
-    printing_on = True
-else:
-    printing_on = False
+    og_players.append("p" + str(i + 1))
 start_time = time.time()
-for z in range(desired_games):
+minutes_games_remaining = desired_minutes_games
+if mode == "2":
+    minutes_games_remaining = minutes_games_remaining * 60   
+while minutes_games_remaining > 0:
     extras = True
     if str(desired_time).lower() == "r":
         desired_time = random.randrange(5, 10) * 60
     timer = desired_time
-    game_number = z + 1
+    game_number += 1
     players.clear()
     for i in range(num_players):
         players.append("p" + str(i + 1))
@@ -313,6 +321,10 @@ for z in range(desired_games):
         check_empty_piles()
     if timer < 0:
         timer = 0
+    if desired_time - timer < shortest:
+        shortest = desired_time - timer
+    if mode == "2":
+        minutes_games_remaining -= desired_time - timer
     if timer == 0:
         if printing_on == True:
             print("Time's up!")
@@ -320,32 +332,41 @@ for z in range(desired_games):
         scoring()
     else:
         ended_early += 1
-    if desired_time - timer < shortest:
-        shortest = desired_time - timer
     if len(players) == 1:
         if printing_on == True:
             print(f"Player {players[0][1:]} wins with 96 points")
         score_data["wins"][players[0]] += 1
         ninety_six += 1
+    if mode == "1":
+        minutes_games_remaining -= 1
     if printing_on == False:
-        if z != desired_games - 1:
-            print(f"{z + 1} of {desired_games} games simulated")
-            print("\033[1A", end = "\x1b[2K")
-        else:
-            print(f"{z + 1} of {desired_games} games simulated", end = "\n")
+        if mode == "1":
+            if minutes_games_remaining > 0:
+                print(f"{'{:,}'.format(desired_minutes_games - minutes_games_remaining)} of {'{:,}'.format(desired_minutes_games)} games simulated")
+                print("\033[1A", end = "\x1b[2K")
+            else:
+                print(f"{'{:,}'.format(desired_minutes_games - minutes_games_remaining)} of {'{:,}'.format(desired_minutes_games)} games simulated", end = "\n")
+        elif mode == "2":
+            if minutes_games_remaining > 0:
+                print(f"{'{:,}'.format(round(desired_minutes_games - minutes_games_remaining / 60))} of {'{:,}'.format(desired_minutes_games)} minutes of gameplay simulated")
+                print("\033[1A", end = "\x1b[2K")
+            else:
+               print(f"{'{:,}'.format(desired_minutes_games)} of {'{:,}'.format(desired_minutes_games)} minutes of gameplay simulated", end = "\n") 
     for x, d in player_data.items():
             for i in d.values():
                 i.clear()
 print("-----------------------")
 print(f"Simulation runtime: {str(datetime.timedelta(seconds = time.time() - start_time))}")
+if mode == "2":
+    print(f"{game_number} games were simulated")
 print(f"Shortest game: {str(datetime.timedelta(seconds = shortest))}")
 for i in og_players:
-    print(f"Player {i[1:]} wins: {'{:,}'.format(score_data["wins"][i])} ({round((score_data["wins"][i]/desired_games) * 100, 5)}%)")
-print(f"Ties: {'{:,}'.format(ties)} ({round((ties/desired_games) * 100, 5)}%)")
-print(f"96 to 0 games: {'{:,}'.format(ninety_six)} ({round((ninety_six/desired_games) * 100, 5)}%)")
-print(f"Games that ended early: {'{:,}'.format(ended_early)} ({round((ended_early/desired_games) * 100, 5)}%)")
+    print(f"Player {i[1:]} wins: {'{:,}'.format(score_data["wins"][i])} ({round((score_data["wins"][i]/game_number) * 100, 5)}%)")
+print(f"Ties: {'{:,}'.format(ties)} ({round((ties/game_number) * 100, 5)}%)")
+print(f"96 to 0 games: {'{:,}'.format(ninety_six)} ({round((ninety_six/game_number) * 100, 5)}%)")
+print(f"Games that ended early: {'{:,}'.format(ended_early)} ({round((ended_early/game_number) * 100, 5)}%)")
 if four_aces != 0:
-    print(f"Games where someone has 4 aces: {'{:,}'.format(four_aces)} ({round((four_aces/desired_games) * 100, 5)}%) (wins in this situation: {'{:,}'.format(four_aces_win)} [{round((four_aces_win/four_aces)* 100, 5)}%])")
+    print(f"Games where someone has 4 aces: {'{:,}'.format(four_aces)} ({round((four_aces/game_number) * 100, 5)}%) (wins in this situation: {'{:,}'.format(four_aces_win)} [{round((four_aces_win/four_aces)* 100, 5)}%])")
 else:
     print("Games where someone has 4 aces: 0")
 if len(two_way_wars) != 0:
